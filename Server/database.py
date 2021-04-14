@@ -1,5 +1,5 @@
 # pip install mysql-connector-python
-import mysql.connector
+import sqlite3
 
 class ConnectionMeta(type):
     _instances = {}
@@ -14,14 +14,8 @@ class ConnectionMeta(type):
 class Connection(metaclass=ConnectionMeta):
     cnx = None
     def __init__(self):
-        self.cnx = mysql.connector.connect(
-            user='sql11402333',
-            password='REAQNqhjEa',
-            host='sql11.freemysqlhosting.net',
-            database='sql11402333',
-            port=3306,
-            autocommit=True
-        )
+        self.cnx = sqlite3.connect('database.db', isolation_level=None)
+        self.cnx.cursor().execute('')
     
     def getInstance(self):
         return self.cnx.cursor()
@@ -30,21 +24,39 @@ class Connection(metaclass=ConnectionMeta):
         self.cnx.close()
         
 # Example
-if __name__ == "__main__":
-    # The client code.
 
+def create_db():
     cursor = Connection().getInstance()
     
-    querry = "INSERT INTO `users` (`username`, `password`, `email`) VALUES (%s, %s, %s)";
+    querry = "DROP TABLE IF EXISTS `users`;";
+    cursor.execute(querry);
+    
+    querry = """
+    CREATE TABLE `users` (
+        `users_id` INTEGER PRIMARY KEY AUTOINCREMENT,
+        `username` varchar(32) NOT NULL UNIQUE,
+        `password` varchar(60) NOT NULL,
+        `email` varchar(255) NOT NULL UNIQUE
+    );
+    """
+    cursor.execute(querry);
+    
+    
+if __name__ == "__main__":
+    
+    #create_db()
+    cursor = Connection().getInstance()
+    
+    """
+    querry = "INSERT INTO `users` (`username`, `password`, `email`) VALUES (?, ?, ?)";
     values = ("User_123", "Password_123", "Email_123")
     cursor.execute(querry, values);
-    
+    """
     querry = "SELECT * FROM `users`";
     cursor.execute(querry);
     
     for row in cursor:
         print (row)
-    
 
 
 
