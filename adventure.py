@@ -1,43 +1,115 @@
 from decimal import getcontext, Decimal
 import random
 
+class CurrencyContainer:
+    def __init__(self, dif_level, forclass):
+        # todo generowanie treasures
+
+        if forclass == 'Challenge':
+            temp = ['Might', 'Cunning', 'Psyche', 'Lore']
+            self.exp = [Currency(Decimal(random.randrange(100,300,1)/100)*dif_level[i], i) for i in range(4)]
+            self.gold = Currency(Decimal(random.randrange(200,500,1)/100)*sum(dif_level), 'gold')
+            self.treasures = Currency(0,'treasures')
+
+        #nagrody 3-5 razy wieksze niz w challenge
+        if forclass == 'Adventure':
+            temp = ['Might', 'Cunning', 'Psyche', 'Lore']
+            self.exp = [Currency(Decimal(random.randrange(300,1500,1)/100)*dif_level[i], i) for i in range(4)]
+            self.gold = Currency(Decimal(random.randrange(600,2500,1)/100)*sum(dif_level), 'gold')
+            self.treasures = Currency(0,'treasures')
+
+    pass
+
+class ItemContainer:
+    #przechowywanie itemow do zdobycia i losowanie ich na nagrode
+    #wywolanie ItemContainer(dif_level, 'challenge')
+    #self.waluta = ItemContainer(dif_level, 'adventure')
+    #dif_level [0,0,0,0]
+    pass
+
+
+
 class RewardChallenge:
-    def __init__(self, attr, eq):
-        self.attr = attr    #[0,0,0,0]
-        self.eq = eq        #lista obiektow Item
+    def __init__(self, dif_level):
+        self.waluta = CurrencyContainer(dif_level, 'Challenge')
+        self.eq = ItemContainer(dif_level, 'Challenge')
 
-
-# todo - jakiego rodzaju nagrody za cala przygode?
 class RewardAdventure:
-    def __init__(self):
-        pass
+    def __init__(self, dif_level):
+        self.waluta = CurrencyContainer(dif_level, 'Adventure')
+        self.eq = ItemContainer(dif_level, 'Adventure')
 
-#Lukasz - parametry Challenge generujemy losowo.
-
-# todo wewnatrz klasy challenge czy poza nia i gotowe obiekty przekazac przez argumenty?
 
 #todo ustawienie parametrów losowania oraz
 # aktualizacja wraz z postepem gry (coraz wyzsze przedzialy losowania)
-# i generowanie coraz lepszych przedmiotow - tutaj czy w klasie Item?????
+# i generowanie coraz lepszych przedmiotow - tutaj czy w klasie Item????? - Lukasz wie
+
+challenge_names = ["Wyzwanie1", "Walka z niedzwiedziem", "Przeplyniecie rzeki"]
+adventure_names = ["Przygoda1", "Wyprawa w gory"]
+
+class ObozException(Exception):
+    pass
+
 class Challenge: #wyzwanie
-    def __init__(self, reward, type, dif_level, cost):
-        self.reward = reward        #obiekt typu RewardChallenge?
-        self.type = type            #[False,False,False,False]
-        self.difficulty = dif_level #[0,0,0,0]
-        self.cost = cost            #[0,0,0,0]
+    def __init__(self, dif_level):
+        self.name = random.choice(challenge_names);
+        self.difficulty = [Decimal(random.randrange(50, 150, 1)/100)*dif_level[i] for i in range(4)]
+        self.reward = RewardChallenge(self.difficulty)
+        #self.type = type            #[False,False,False,False]
+        self.cost = [Decimal(random.randrange(50, 100, 1)/500)*self.difficulty[i] for i in range(4)]
+
+    def onClock(self, bohater):
+        temp_list = [bohater.passive[i].actual - self.cost[i] for i in range(4)]
+        for i in temp_list:
+            if i<=0:
+                raise ObozException
+        self.difficulty = temp_list
+        for i in range(4):
+            if self.difficulty[i] - bohater.active[i].points > 0:
+                self.difficulty[i] -= bohater.active[i].points
+            else: self.difficulty[i] = 0
+        return self.difficulty == [0,0,0,0] #true if completed challenge
 
 class Adventure: #przygoda
-    def __init__(self, reward, dif_level, cost):
+    def __init__(self, dif_level):
+        self.name = random.choice(adventure_names)
         self.amount = random.randint(4,20)
-        self.challenges = [Challenge() for i in range(self.amount)]
+        self.challenges = [Challenge(dif_level) for i in range(self.amount)]
+        self.challenge_index = 0
         self.in_action = False
-        self.reward = reward     #obiektRewardAdventure
-        #pasek postepu przygody - gdzie?
-        #pasek postepu danego wyzwania - gdzie?
+        self.reward = RewardAdventure(dif_level)
+        #todo pasek postepu przygody - gdzie? czy rzeba dodatkowe parametry initial_cost, initial_difficulty?
+        #todo pasek postepu danego wyzwania - gdzie?
 
-class Item:
-    def __init__(self):
-        pass
+    def start(self):
+        self.in_action = True
+
+
+    # '''Zwraca bool czy bohater moze kontynuowac przygode.'''
+    '''Zwraca bool czy przygoda zostala ukonczona.'''
+    def onClock(self, bohater):
+        if self.in_action:
+            try:
+                if self.challenges[self.challenge_index].onClock(bohater):
+                    bohater.getChallengeReward(self.challenges[self.challenge_index].reward)
+                    if self.challenge_index + 1 == self.amount:
+                        self.challenge_index += 1
+                        return False
+                    else:
+                        bohater.getAdventureReward(self.reward)
+                        self.in_action = False
+                        return True
+            except ObozException:
+                raise #do nadrzednej metody
+            except Exception as e:
+                print(e)
+                print("ADVENTURE EXCEPTION")
+
+
+
+
+#class Item:
+#        pass
 
 
 
@@ -75,20 +147,22 @@ class Act:
 
 
 class ActiveAttribute:
+    #todo
     def __init__(self, nazwa, currency):
         self.name = nazwa
         self.exp_to_next_level = Decimal(0)
         self.level = Decimal(0)
-        self.points = Decimal(0)
+        self.points = Decimal(0) #nazwa uzywana w klasie Adventure
         self.currency = Currency(currency)
 
 class PassiveAttribute:
+    #todo
     def __init__(self, nazwa, max):
         self.name = nazwa
         self.exp_to_next_level = Decimal(50)
         self.level = Decimal(0)             #trzeba ten atrybut?
         self.max = Decimal(max)
-        self.actual = Decimal(max)
+        self.actual = Decimal(max)  #nazwa uzywana w klasie Adventure
 
     #def increase_max(self, increment):
     #    self.max += increment
@@ -96,8 +170,9 @@ class PassiveAttribute:
 
 
 class Currency:
-    def __init__(self, amount=0):
-        self.set = Decimal(amount)
+    #def __init__(self, amount=0):
+    #    self.set = Decimal(amount)
+    pass
 
 class Bohater:
     def __init__(self):
@@ -119,11 +194,35 @@ class Bohater:
         self.ploy = PassiveAttribute('Ploy')
         self.spirit = PassiveAttribute('Spirit')
         self.clarity = PassiveAttribute('Clarity')
+        #potrzebne sa listy z referencjami do atrybutow czynnych i pasywne, najlepiej z uwzglednionymi bonusami, modyfikatorami
         self.passive = [self.might, self.cunning, self.psyche, self.lore]
         self.active = [self.stamina, self.health, self.ploy, self.spirit, self.clarity]
 
+    def getChallengeReward(self, challenge_reward):
+        #otrzymanie nagrody za ukonczony challenge, nazwa metody taka?? uzyta w klasie Adventura
+        pass
+
+    def getAdventureReward(self, adventure_reward):
+        pass
 
 
+
+#trik przekazywanie wartosci przez referencje
+'''
+class x:
+    def __init__(self):
+        self.q=1
+a = x()
+b = [a]
+a.q = 2
+print(a.q)
+print(b[0].q)
+b[0].q=3
+print(a.q)
+print(b[0].q)
+
+wynik 2 2 3 3
+'''
 
 def main():
 
