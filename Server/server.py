@@ -7,8 +7,8 @@ class Server:
     def __listen__(self):
         print("Listening...")
         while True:
-            data, client = self.incoming.receive();
-            print("Received from " + client[0] + ":" + str(client[1]))
+            data, clientIP, clientPort = self.incoming.receive();
+            print("Received from " + clientIP + ":" + str(clientPort))
             print("\t", data)
             
             if data == b'ping':
