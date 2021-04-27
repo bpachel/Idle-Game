@@ -4,19 +4,25 @@ import random
 class CurrencyContainer:
     def __init__(self, dif_level, forclass):
         # todo generowanie treasures
+        temp = ['might_exp', 'cunning_exp', 'psyche_exp', 'lore_exp']
 
         if forclass == 'Challenge':
-            temp = ['Might', 'Cunning', 'Psyche', 'Lore']
             self.exp = [Currency(Decimal(random.randrange(100,300,1)/100)*dif_level[i], i) for i in range(4)]
             self.gold = Currency(Decimal(random.randrange(200,500,1)/100)*sum(dif_level), 'gold')
-            self.treasures = Currency(0,'treasures')
+            self.treasures = Currency(0,'treasure')
 
         #nagrody 3-5 razy wieksze niz w challenge
         if forclass == 'Adventure':
-            temp = ['Might', 'Cunning', 'Psyche', 'Lore']
             self.exp = [Currency(Decimal(random.randrange(300,1500,1)/100)*dif_level[i], i) for i in range(4)]
             self.gold = Currency(Decimal(random.randrange(600,2500,1)/100)*sum(dif_level), 'gold')
-            self.treasures = Currency(0,'treasures')
+            self.treasures = Currency(0,'treasure')
+
+        #interfejs wypisuje tylko niezerowe nagrody
+        self.print_list = [i for i in self.exp if i.val > Decimal(0)]
+        if self.gold.val > Decimal(0):
+            self.print_list.append(self.gold)
+        if self.treasures.val > Decimal(0):
+            self.print_list.append(self.treasures)
 
     pass
 
@@ -69,6 +75,7 @@ class Challenge: #wyzwanie
                 self.difficulty[i] -= bohater.active[i].points
             else: self.difficulty[i] = 0
         return self.difficulty == [0,0,0,0] #true if completed challenge
+        #todo zwracanie nagrody
 
 class Adventure: #przygoda
     def __init__(self, dif_level):
@@ -104,6 +111,7 @@ class Adventure: #przygoda
             except Exception as e:
                 print(e)
                 print("ADVENTURE EXCEPTION")
+        #todo zwracanie nagrody
 
 
 
