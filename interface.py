@@ -129,7 +129,6 @@ class GameView(tk.Frame):
         tk.Label(self, text='Necromancy', bg='#ccfffc').grid(row=8, column=0, sticky="nwse")
         tk.Label(self, text='Bones').grid(row=9, column=0, sticky="nwse")
         tk.Label(self, text='Bone dust').grid(row=10, column=0, sticky="nwse")
-        tk.Label(self, text='Gems', bg='#ccfffc').grid(row=11, column=0, sticky="nwse")
         tk.Label(self, text='Gems').grid(row=12, column=0, sticky="nwse")
         tk.Label(self, text='Arcane gem').grid(row=13, column=0, sticky="nwse")
 
@@ -140,19 +139,24 @@ class GameView(tk.Frame):
         tk.Label(self, text='Mana').grid(row=4, column=4, sticky="nwse")
 
         load_stamina = ttk.Progressbar(self,orient=tk.HORIZONTAL,length=100,mode='determinate')
-        load_stamina.grid(row=0, column=5, sticky="nwse")
+        load_stamina['value'] = load_stamina['maximum']
+        load_stamina.grid(row=0, column=5, sticky="we")
 
         def stop():
             load_stamina.stop()
             load_stamina['value'] = load_stamina['maximum']
 
+        def resetProgress():
+            load_stamina['value'] = load_stamina['maximum']
+         
         def step(val):
             step = val
-            load_stamina.start(step)
-            t = load_stamina['maximum'] * step
-            self.after(t, stop)
+            load_stamina['value'] += step
 
-        tk.Button(self, text='step',command=lambda: step(20)).grid(row=1, column=5, sticky="nwse")
+        self.step = step
+        self.refresh()
+
+        tk.Button(self, text='step',command=resetProgress).grid(row=1, column=5, sticky="nwse")
 
         activity_names=["Do chores", "Treat ailments", "Buy scroll",
                           "Sell scroll", "Study", "rest", "Run errands"]
@@ -180,9 +184,11 @@ class GameView(tk.Frame):
         for y in range(10):
             self.columnconfigure(y, weight=1)
 
-    def update(self):
+
+    def refresh(self):
         """Uaktualnij dane na stronie"""
-        pass
+        self.step(-0.01)
+        self.after(1, self.refresh)
 
     def reset(self):
         """Zresetuj stronę do stanu początkowego"""
