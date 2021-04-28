@@ -25,11 +25,11 @@ class Application(tk.Tk):
 
         self.frames = {}
         self.create_frames()
-        self.show_frame("MainWindow")
+        self.show_frame("MenuView")
 
     def create_frames(self):
         """zainicjalizuj wszystkie strony i umieść je jedna na drugiej"""
-        for F in (MainWindow, PageOne, PageTwo):
+        for F in (MenuView, GameView, GameEndView):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self)
             self.frames[page_name] = frame
@@ -58,9 +58,9 @@ class Application(tk.Tk):
         frame.update()
 
 
-class MainWindow(tk.Frame):
+class MenuView(tk.Frame):
     def __init__(self, parent, controller):
-        """Konstruktor dla MainWindow.
+        """Konstruktor dla MenuView.
         Args:
             parent: tk.Frame, kontener będący rodzicem strony.
             controller: Application, instancja klasy bazowej
@@ -69,17 +69,18 @@ class MainWindow(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        bg_image = tk.PhotoImage(\
-            file=r"C:\Users\matht\Downloads\Materiały_Monaker_UI_1\validation.png")
-        x = tk.Label(self, image=bg_image)
-        x.place(x=0, y=0, relwidth=1, relheight=1)
-        x.image = bg_image
+        # background:
+        # bg_image = tk.PhotoImage(\
+        #     file=r"C:\Users\matht\Downloads\Materiały_Monaker_UI_1\validation.png")
+        # x = tk.Label(self, image=bg_image)
+        # x.place(x=0, y=0, relwidth=1, relheight=1)
+        # x.image = bg_image
 
         some_lb = tk.Label(self, text='Menu', font=controller.main_font)
         newGame_btn = tk.Button(self, text="New Game", font=controller.main_font,
-                                command=lambda: controller.show_frame("PageOne"))
+                                command=lambda: controller.show_frame("GameView"))
         exitGame_btn = tk.Button(self, text="Exit", font=controller.main_font,
-                                command=lambda: controller.show_frame("PageOne"))
+                                 command=lambda: controller.show_frame("GameView"))
 
         some_lb.grid(row=2, column=2, sticky='nesw')
         newGame_btn.grid(row=4, column=2, sticky='ew')
@@ -99,9 +100,9 @@ class MainWindow(tk.Frame):
         pass
 
 
-class PageOne(tk.Frame):
+class GameView(tk.Frame):
     def __init__(self, parent, controller):
-        """Konstruktor dla PageOne.
+        """Konstruktor dla GameView.
         Args:
             parent: tk.Frame, kontener będący rodzicem strony.
             controller: Application, instancja klasy bazowej
@@ -112,11 +113,29 @@ class PageOne(tk.Frame):
             family='Helvetica', size=12, weight='bold')
 
         some_lb = tk.Label(self, text='Game', font=controller.main_font)
-        pageTwo_btn = tk.Button(self, text="finish game", font=controller.main_font,
-                                command=lambda: controller.show_frame("PageTwo"))
 
-        some_lb.grid(row=0, column=0)
-        pageTwo_btn.grid(row=1, column=0)
+        GameEndView_btn = tk.Button(self, text="finish game", font=controller.main_font,
+                                    command=lambda: controller.show_frame("GameEndView"))
+
+        activity_names = ["Do chores", "Treat ailments", "Buy scroll",
+                          "Sell scroll", "Study", "rest", "Run errands"]
+
+        activity_btns = []
+
+        for i in range(len(activity_names)):
+            b = tk.Button(self, text=activity_names[i])
+            activity_btns.append(b)
+
+        cols = 3
+        rows = len(activity_btns) // cols + (len(activity_btns) % cols > 0)
+
+        for i in range(len(activity_btns)):
+            c=i%cols
+            r=i//cols
+            activity_btns[i].grid(row=r, column=c, sticky="nwse", padx=2,pady=2)
+
+        #some_lb.grid(row=0, column=0)
+        #GameEndView_btn.grid(row=1, column=0)
 
     def update(self):
         """Uaktualnij dane na stronie"""
@@ -127,7 +146,7 @@ class PageOne(tk.Frame):
         pass
 
 
-class PageTwo(tk.Frame):
+class GameEndView(tk.Frame):
     """Okno ekranu końcowego.
     Attributes:
         controller: Application, odpowiada argumentowi dostarczonemu w konstruktorze,
@@ -135,7 +154,7 @@ class PageTwo(tk.Frame):
     """
 
     def __init__(self, parent, controller):
-        """Konstruktor dla PageTwo.
+        """Konstruktor dla GameEndView.
         Tworzy przyciski i etykiety, rozmieszcza elementy na stronie.
         Args:
             parent: tk.Frame, kontener będący rodzicem strony.
@@ -145,11 +164,11 @@ class PageTwo(tk.Frame):
         self.controller = controller
 
         some_lb = tk.Label(self, text='Game Over', font=controller.main_font)
-        mainWindow_btn = tk.Button(self, text="Restart", font=controller.main_font,
-                                   command=lambda: controller.show_frame("MainWindow"))
+        MenuView_btn = tk.Button(self, text="Restart", font=controller.main_font,
+                                 command=lambda: controller.show_frame("MenuView"))
 
         some_lb.grid(row=0, column=0)
-        mainWindow_btn.grid(row=1, column=0)
+        MenuView_btn.grid(row=1, column=0)
 
     def update(self):
         """Uaktualnij dane na stronie"""
@@ -164,7 +183,7 @@ def main():
     # app = Application(game)
     app = Application()
     app.geometry("500x400")
-  
+
     app.mainloop()
 
 
