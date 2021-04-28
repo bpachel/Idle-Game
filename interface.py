@@ -7,7 +7,7 @@ class Application(tk.Tk):
     # def __init__(self, game, *args, **kwargs):
     def __init__(self, *args, **kwargs):
         """Konstruktor dla Application.
-        Tworzy wszystkie strony oraz kontener, w którym będą one umieszczone. Ustawia 
+        Tworzy wszystkie strony oraz kontener, w którym będą one umieszczone. Ustawia
         i konfiguruje domyślne wartości, umieszcza kontener oraz strony na ekranie.
         Args:
             *args: Variable length argument list.
@@ -117,25 +117,46 @@ class GameView(tk.Frame):
         GameEndView_btn = tk.Button(self, text="finish game", font=controller.main_font,
                                     command=lambda: controller.show_frame("GameEndView"))
 
-        activity_names = ["Do chores", "Treat ailments", "Buy scroll",
+        left_lb1 = tk.Label(self, text='Other', bg='#ccfffc').grid(row=0, column=0, sticky="nwse")
+        left_lb2 = tk.Label(self, text='Gold').grid(column=0, sticky="nwse")
+        left_lb3 = tk.Label(self, text='Research').grid(row=2, column=0, sticky="nwse")
+        left_lb4 = tk.Label(self, text='Arcaria').grid(row=3, column=0, sticky="nwse")
+        left_lb5 = tk.Label(self, text='Herbs').grid(row=4, column=0, sticky="nwse")
+        left_lb6 = tk.Label(self, text='Books', bg='#ccfffc').grid(row=5, column=0, sticky="nwse")
+        left_lb7 = tk.Label(self, text='Scrolls').grid(row=6, column=0, sticky="nwse")
+        left_lb7 = tk.Label(self, text='Cadices').grid(row=7, column=0, sticky="nwse")
+        left_lb7 = tk.Label(self, text='Necromancy', bg='#ccfffc').grid(row=8, column=0, sticky="nwse")
+        left_lb7 = tk.Label(self, text='Bones').grid(row=9, column=0, sticky="nwse")
+        left_lb7 = tk.Label(self, text='Bone dust').grid(row=10, column=0, sticky="nwse")
+        left_lb7 = tk.Label(self, text='Gems', bg='#ccfffc').grid(row=11, column=0, sticky="nwse")
+        left_lb7 = tk.Label(self, text='Gems').grid(row=12, column=0, sticky="nwse")
+        left_lb7 = tk.Label(self, text='Arcane gem').grid(row=13, column=0, sticky="nwse")
+
+        activity_names=["Do chores", "Treat ailments", "Buy scroll",
                           "Sell scroll", "Study", "rest", "Run errands"]
 
-        activity_btns = []
+        activity_btns= []
 
         for i in range(len(activity_names)):
-            b = tk.Button(self, text=activity_names[i])
+            b= tk.Button(self, text=activity_names[i])
             activity_btns.append(b)
 
-        cols = 3
-        rows = len(activity_btns) // cols + (len(activity_btns) % cols > 0)
+        cols= 3
+        rows= len(activity_btns) // cols + (len(activity_btns) % cols > 0)
 
         for i in range(len(activity_btns)):
-            c=i%cols
-            r=i//cols
-            activity_btns[i].grid(row=r, column=c, sticky="nwse", padx=2,pady=2)
+            c = i % cols + 1
+            r = i//cols
+            activity_btns[i].grid(
+                row=r, column=c, sticky="nwse", padx=2, pady=2)
 
-        #some_lb.grid(row=0, column=0)
-        #GameEndView_btn.grid(row=1, column=0)
+        # some_lb.grid(row=0, column=0)
+        # GameEndView_btn.grid(row=1, column=0)
+
+        for x in range(20):
+            self.rowconfigure(x, weight=1)
+        for y in range(10):
+            self.columnconfigure(y, weight=1)
 
     def update(self):
         """Uaktualnij dane na stronie"""
@@ -165,7 +186,7 @@ class GameEndView(tk.Frame):
 
         some_lb = tk.Label(self, text='Game Over', font=controller.main_font)
         MenuView_btn = tk.Button(self, text="Restart", font=controller.main_font,
-                                 command=lambda: controller.show_frame("MenuView"))
+                                 command = lambda: controller.show_frame("MenuView"))
 
         some_lb.grid(row=0, column=0)
         MenuView_btn.grid(row=1, column=0)
