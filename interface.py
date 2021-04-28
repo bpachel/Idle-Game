@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import font as tkfont
 
 
@@ -117,20 +118,41 @@ class GameView(tk.Frame):
         GameEndView_btn = tk.Button(self, text="finish game", font=controller.main_font,
                                     command=lambda: controller.show_frame("GameEndView"))
 
-        left_lb1 = tk.Label(self, text='Other', bg='#ccfffc').grid(row=0, column=0, sticky="nwse")
-        left_lb2 = tk.Label(self, text='Gold').grid(column=0, sticky="nwse")
-        left_lb3 = tk.Label(self, text='Research').grid(row=2, column=0, sticky="nwse")
-        left_lb4 = tk.Label(self, text='Arcaria').grid(row=3, column=0, sticky="nwse")
-        left_lb5 = tk.Label(self, text='Herbs').grid(row=4, column=0, sticky="nwse")
-        left_lb6 = tk.Label(self, text='Books', bg='#ccfffc').grid(row=5, column=0, sticky="nwse")
-        left_lb7 = tk.Label(self, text='Scrolls').grid(row=6, column=0, sticky="nwse")
-        left_lb7 = tk.Label(self, text='Cadices').grid(row=7, column=0, sticky="nwse")
-        left_lb7 = tk.Label(self, text='Necromancy', bg='#ccfffc').grid(row=8, column=0, sticky="nwse")
-        left_lb7 = tk.Label(self, text='Bones').grid(row=9, column=0, sticky="nwse")
-        left_lb7 = tk.Label(self, text='Bone dust').grid(row=10, column=0, sticky="nwse")
-        left_lb7 = tk.Label(self, text='Gems', bg='#ccfffc').grid(row=11, column=0, sticky="nwse")
-        left_lb7 = tk.Label(self, text='Gems').grid(row=12, column=0, sticky="nwse")
-        left_lb7 = tk.Label(self, text='Arcane gem').grid(row=13, column=0, sticky="nwse")
+        tk.Label(self, text='Other', bg='#ccfffc').grid(row=0, column=0, sticky="nwse")
+        tk.Label(self, text='Gold').grid(column=0, sticky="nwse")
+        tk.Label(self, text='Research').grid(row=2, column=0, sticky="nwse")
+        tk.Label(self, text='Arcaria').grid(row=3, column=0, sticky="nwse")
+        tk.Label(self, text='Herbs').grid(row=4, column=0, sticky="nwse")
+        tk.Label(self, text='Books', bg='#ccfffc').grid(row=5, column=0, sticky="nwse")
+        tk.Label(self, text='Scrolls').grid(row=6, column=0, sticky="nwse")
+        tk.Label(self, text='Cadices').grid(row=7, column=0, sticky="nwse")
+        tk.Label(self, text='Necromancy', bg='#ccfffc').grid(row=8, column=0, sticky="nwse")
+        tk.Label(self, text='Bones').grid(row=9, column=0, sticky="nwse")
+        tk.Label(self, text='Bone dust').grid(row=10, column=0, sticky="nwse")
+        tk.Label(self, text='Gems', bg='#ccfffc').grid(row=11, column=0, sticky="nwse")
+        tk.Label(self, text='Gems').grid(row=12, column=0, sticky="nwse")
+        tk.Label(self, text='Arcane gem').grid(row=13, column=0, sticky="nwse")
+
+        tk.Label(self, text='Stamina').grid(row=0, column=4, sticky="nwse")
+        tk.Label(self, text='Hp').grid(row=1, column=4, sticky="nwse")
+        tk.Label(self, text='Spirit').grid(row=2, column=4, sticky="nwse")
+        tk.Label(self, text='Light').grid(row=3, column=4, sticky="nwse")
+        tk.Label(self, text='Mana').grid(row=4, column=4, sticky="nwse")
+
+        load_stamina = ttk.Progressbar(self,orient=tk.HORIZONTAL,length=100,mode='determinate')
+        load_stamina.grid(row=0, column=5, sticky="nwse")
+
+        def stop():
+            load_stamina.stop()
+            load_stamina['value'] = load_stamina['maximum']
+
+        def step(val):
+            step = val
+            load_stamina.start(step)
+            t = load_stamina['maximum'] * step
+            self.after(t, stop)
+
+        tk.Button(self, text='step',command=lambda: step(20)).grid(row=1, column=5, sticky="nwse")
 
         activity_names=["Do chores", "Treat ailments", "Buy scroll",
                           "Sell scroll", "Study", "rest", "Run errands"]
@@ -203,7 +225,7 @@ class GameEndView(tk.Frame):
 def main():
     # app = Application(game)
     app = Application()
-    app.geometry("500x400")
+    app.geometry("800x500")
 
     app.mainloop()
 
