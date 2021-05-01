@@ -1,6 +1,8 @@
 import socket
-import packet
+
 from decimal import Decimal
+from packet import Packet
+from packetTypes import PacketType
 
 class UdpSocket:
 
@@ -30,11 +32,16 @@ class UdpSocket:
     def send(self, data, server_ip, server_port):
         """
             Send data to a remote peer
-            @param: data          Data to send
+            @param: data          Data or Packet to send
             @param: remoteAddress Address of the receiver
             @param: remotePort    Port of the receiver to send the data to
         """
-        sent = self.sock.sendto(data.encode(), (server_ip, server_port))
+
+        if data.__class__.__name__ == 'Packet':
+            sent = self.sock.sendto(data.raw_data(), (server_ip, server_port))
+        else:
+            raise Exception("Data type must be 'Packet'.")
+            
         if sent < 0:
             raise Exception('Failed to send data');
         
@@ -53,11 +60,25 @@ class UdpSocket:
 if __name__ == "__main__":   
     
     sock = UdpSocket()
-    message = 'ping'
-    sock.send(message, "127.0.0.1", 5555)
+    
+    packet = Packet(packet_type=PacketType.MESSAGE)
+    packet.add("ping")
+    sock.send(packet, "127.0.0.1", 5555)
+
+    packet = Packet(packet_type=PacketType.LOGIN)
+    packet.add("User_123")
+    packet.add("Password_123")
+    sock.send(packet, "127.0.0.1", 5555)
+    
     data, server = sock.receive()
-    print(data)
-    #print(data, server);
+    packet = Packet(raw_data = data)
+    packet.get_type()
+    result = packet.get()
+    if result == 1:
+        print("Login Success")
+    else:
+        print("Login Failed")
+        
 
 
 
