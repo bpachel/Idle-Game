@@ -73,7 +73,7 @@ class Server:
         self.running = True;
         self.listening_thread.start()
         while (True):
-            time.sleep(1000)
+            time.sleep(1.0)
 
 
 if __name__ == "__main__":
