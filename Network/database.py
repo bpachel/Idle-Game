@@ -1,4 +1,4 @@
-# pip install mysql-connector-python
+# pip install sqlite3
 import sqlite3
 
 class ConnectionMeta(type):
