@@ -11,6 +11,9 @@ class Currency():
     to do:
     ustalić jakie waluty wystąpią w finalnym produkcie i dodać sprawdzanie poprawności typu do konstruktora
     '''
+    
+    type_error = "Cant '{}' currency of type '{}' and '{}'."
+    
     def __init__(self, val=0, type='gold'):
         self.val = Decimal(val)
         self.type = type
@@ -20,7 +23,7 @@ class Currency():
             if other.type == self.type:
                 return self.val*other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("mul", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val*other
         else:
@@ -31,7 +34,7 @@ class Currency():
             if other.type == self.type:
                 return self.val+other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("add", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val+other
         else:
@@ -42,7 +45,7 @@ class Currency():
             if other.type == self.type:
                 return self.val-other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("sub", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val-other
         else:
@@ -53,7 +56,7 @@ class Currency():
             if other.type == self.type:
                 return other.val - self.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("rsub", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return other - self.val
         else:
@@ -64,7 +67,7 @@ class Currency():
             if other.type == self.type:
                 return self.val/other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("truediv", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val/other
         else:
@@ -75,7 +78,7 @@ class Currency():
             if other.type == self.type:
                 return other.val/self.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("rtruediv", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return other/self.val
         else:
@@ -86,7 +89,7 @@ class Currency():
             if other.type == self.type:
                 return self.val < other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("<", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val < other
         else:
@@ -97,7 +100,7 @@ class Currency():
             if other.type == self.type:
                 return self.val <= other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("<=", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val <= other
         else:
@@ -108,7 +111,7 @@ class Currency():
             if other.type == self.type:
                 return self.val == other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("==", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val == other
         else:
@@ -119,7 +122,7 @@ class Currency():
             if other.type == self.type:
                 return self.val != other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format("!=", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val != other
         else:
@@ -130,7 +133,7 @@ class Currency():
             if other.type == self.type:
                 return self.val > other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format(">", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val > other
         else:
@@ -141,7 +144,7 @@ class Currency():
             if other.type == self.type:
                 return self.val >= other.val
             else:
-                raise TypeError
+                raise TypeError( self.type_error.format(">=", self.type, other.type) )
         elif isinstance(other, Decimal) or isinstance(other, int):
             return self.val >= other
         else:

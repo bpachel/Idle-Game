@@ -233,7 +233,7 @@ wynik 2 2 3 3
 '''
 
 def main():
-
+    pass
 
 if __name__ == "__main__":
     main()
