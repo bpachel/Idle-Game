@@ -33,7 +33,7 @@ def create_db():
     querries = [
         """DROP TABLE IF EXISTS `users_currency`;""",
         """DROP TABLE IF EXISTS `users_attribute`;""",
-        """DROP TABLE IF EXISTS `users_items`;""",
+        """DROP TABLE IF EXISTS `users_item`;""",
         """DROP TABLE IF EXISTS `users`;""",
         
         """
@@ -105,10 +105,65 @@ def insert_example_data():
     
     querry = "INSERT INTO `users_attribute` (`users_id`) VALUES (1)";
     cursor.execute(querry);
-    
+
+
+def decimal_test():
+    # todo zaokrąglamy decimal do ilus miejsc po przecinku czy ładujemy do bazy ile wlezie?
+    cursor = Connection().getInstance()
+    cursor.execute("""DROP TABLE IF EXISTS `decimaltest`;""")
+
+    querry = """
+    CREATE TABLE `decimaltest` (
+        `id`        INTEGER PRIMARY KEY AUTOINCREMENT,
+        `txt`          TEXT
+    );
+    """
+    i = decimal_test
+    try:
+        cursor.execute(querry)
+    except Exception as e:
+        print(i, "failed.")
+        print(querry)
+        raise e
+
+    print(i, "success.");
+
+    from decimal import getcontext, Decimal
+    #x = Decimal('1234567890123456797342394242394372340.1234567890123456901234567890123456890123123')
+    x = Decimal('1234567890123456797342394242394372340.1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+    '1234567890123456901234567890123456890123123'
+                )
+
+    querry = "INSERT INTO `decimaltest` (`txt`) VALUES (?)"
+    values = (str(x),)
+    cursor.execute(querry,values);
+
+    querry = "SELECT * FROM `decimaltest`"
+    cursor.execute(querry)
+    for row in cursor:
+        print(row)
+        print(row[1])
+        y = Decimal(row[1])
+        if x == y:
+            print("decimal dziala")
 
 if __name__ == "__main__":
-    
+
     create_db()
     insert_example_data()
     cursor = Connection().getInstance()
@@ -130,6 +185,7 @@ if __name__ == "__main__":
         print (row)
 
 
+    decimal_test()
 
 
 
