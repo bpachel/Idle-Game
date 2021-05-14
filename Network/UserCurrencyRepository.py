@@ -2,19 +2,19 @@ from AbstractRepository import AbstractRepository
 
 class UserCurrency:
     def __init__(self):
-        self.id         = ""
-        self.user_id    = ""
-        self.gold       = ""
-        self.treasure   = ""
-        self.might      = ""
-        self.cunning    = ""
-        self.psyche     = ""
-        self.lore       = ""
-        self.stamina    = ""
-        self.health     = ""
-        self.ploy       = ""
-        self.spirit     = ""
-        self.clarity    = ""
+        self.id         = None
+        self.user_id    = None
+        self.gold       = None
+        self.treasure   = None
+        self.might      = None
+        self.cunning    = None
+        self.psyche     = None
+        self.lore       = None
+        self.stamina    = None
+        self.health     = None
+        self.ploy       = None
+        self.spirit     = None
+        self.clarity    = None
 
 class UserCurrencyRepository(AbstractRepository):
 
