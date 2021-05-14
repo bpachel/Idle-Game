@@ -9,7 +9,7 @@ class User:
 
 class UserRepository(AbstractRepository):
 
-    def __create_array_from_result(self, results):
+    def __create_objects_from_result(self, results):
         users = []
 
         for result in results:
@@ -38,11 +38,11 @@ class UserRepository(AbstractRepository):
 
     def findAll(self):
         results = self._findAll()
-        return self.__create_array_from_result(results)
+        return self.__create_objects_from_result(results)
 
     def findBy(self, arr):
         results = self._findBy(arr)
-        return self.__create_array_from_result(results)
+        return self.__create_objects_from_result(results)
 
     def findOneBy(self, arr):
         result = self.findBy(arr)
