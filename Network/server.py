@@ -1,60 +1,94 @@
 import threading
 import time
+import bcrypt
+
+from decimal import Decimal
 
 from UdpSocket import UdpSocket
 from database import Connection
-from decimal import Decimal
 from packet import Packet
 from packetTypes import PacketType
+from UserRepository import UserRepository, User
+
+class PacketHandler:
+
+    def __init__(self, server, cursor):
+        self.cursor = cursor
+        self.server = server
+        self.userRepository = UserRepository()
+
+    def handle(self, packet, client_ip, client_port):
+        type = packet.get_type()
+
+        print("DEBUG: Type ->", type)
+        outgoing_packet = Packet()
+
+        if   type == PacketType.MESSAGE:
+            print("message: ", packet.get())
+            
+        elif type == PacketType.PING:
+            outgoing_packet = Packet(PacketType.PING)
+            outgoing_packet.add("pong")
+            
+        elif type == PacketType.LOGIN:
+            outgoing_packet = Packet(PacketType.LOGIN)
+            
+            login = packet.get()
+            password = packet.get()
+            print("DEBUG: Login ->", login)
+            print("DEBUG: Password ->", password)
+            
+            user = self.userRepository.findOneBy({"username":login})
+
+            print("DEBUG: Hashed Password ->", user.password)
+
+            if bcrypt.checkpw(password.encode(), user.password.encode()):
+                print("DEBUG: Login Success.")
+                outgoing_packet.add(1)
+            else:
+                print("DEBUG: Login Failed.")
+                outgoing_packet.add(0)
+
+        elif type == PacketType.REGISTER:
+            outgoing_packet = Packet(PacketType.REGISTER)
+            login = packet.get()
+            password = packet.get()
+            email = packet.get()
+
+            salt = bcrypt.gensalt()
+            hashed_password = bcrypt.hashpw(password.encode(), salt)
+            print("DEBUG: Hashed Password ->", hashed_password)
+
+            user = User()
+            user.username = login
+            user.password = hashed_password.decode()
+            user.email = email
+            result = self.userRepository.add(user)
+
+            if result:
+                outgoing_packet.add(1)
+            outgoing_packet.add(0)
+            
+        return outgoing_packet
 
 class Server:
 
     def __listen(self):
         print("Listening...")
         cursor = Connection().getInstance()
+        packet_handler = PacketHandler(self, cursor)
+
         while True:
-            data, clientInfo = self.incoming.receive();
-            clientIP, clientPort = clientInfo
+            data, client_info = self.incoming.receive()
+            client_ip, client_port = client_info
             
-            print("DEBUG: Received from " + clientIP + ":" + str(clientPort))
-            print("DEBUG: ", data)
-            
+            print("DEBUG: Received from " + client_ip + ":" + str(client_port))
+            print("DEBUG: data: [", data, "]", sep='')
             
             packet = Packet(raw_data = data)
-            type = packet.get_type()
-            
-            print("DEBUG: Type ->", type)
-            
-            if type == PacketType.MESSAGE:
-                print("message: ", packet.get())
-                
-            if type == PacketType.PING:
-                outgoing_packet = Packet(PacketType.PING)
-                outgoing_packet.add("pong")
-                self.outgoing.send(outgoing_packet, clientIP, clientPort)
-                
-            if type == PacketType.LOGIN:
-                outgoing_packet = Packet(PacketType.LOGIN)
-                
-                login = packet.get();
-                password = packet.get();
-                print("DEBUG: Login ->", login)
-                print("DEBUG: Password ->", password)
-                
-                querry = "SELECT * FROM `users` WHERE `username`=? AND `password`=?";
-                cursor.execute(querry, (login, password))
-                
-                users = cursor.fetchall()
-                if len(users) == 1:
-                    user = users[0]
-                    print("DEBUG: Login success")
-                    outgoing_packet.add(1)
-                    self.users.append( [user[0], user[1], clientIP, clientPort] )
-                else:
-                    print("DEBUG: Login failed")
-                    outgoing_packet.add(0)
-                
-                self.outgoing.send(outgoing_packet, clientIP, clientPort)
+            outgoing_packet = packet_handler.handle(packet, client_ip, client_port)
+            if not outgoing_packet.get_size() == 0:
+                self.outgoing.send(outgoing_packet, client_ip, client_port)
                 
         
     def __init__(self):
@@ -66,11 +100,9 @@ class Server:
         self.outgoing.bind(5556)
         
         self.listening_thread = threading.Thread(target=self.__listen, args=(), daemon = True)
-        # Database
-        # cursor = Connection().getInstance()
         
     def run(self):
-        self.running = True;
+        self.running = True
         self.listening_thread.start()
         while (True):
             time.sleep(1.0)
