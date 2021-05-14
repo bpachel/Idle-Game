@@ -4,20 +4,29 @@ from database import Connection
 class AbstractRepository:
     def __init__(self, reset):
         self.cursor = Connection().getInstance()
-        self.name = ""
         if reset:
             try:
                 self.cursor.execute(self.delete_querry)
+            except Exception as e:
+                print(self.delete_querry)
+                print("Drop failed.")
+                print(e)
+                raise e
+
+            try:
                 self.cursor.execute(self.create_querry)
             except Exception as e:
                 print(self.create_querry)
-                print("failed.")
+                print("Create failed.")
+                print(e)
                 raise e
 
     def _findAll(self):
+        
         self.get_all_querry = """
             SELECT * FROM {};
         """.format(self.name)
+
 
         try:
             self.cursor.execute(self.get_all_querry)
