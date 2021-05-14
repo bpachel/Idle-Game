@@ -92,7 +92,10 @@ class Packet:
 
     def raw_data(self):
         return self.data
-        
+
+    def get_size(self):
+        return len(self.data)
+
 if __name__ == "__main__":
     p = Packet(packet_type = PacketType.MESSAGE)
     p.add(55)
