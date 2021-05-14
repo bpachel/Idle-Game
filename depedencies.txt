@@ -1,0 +1,4 @@
+Decimal
+sqlite3
+socket
+bcrypt
