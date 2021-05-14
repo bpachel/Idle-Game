@@ -9,12 +9,18 @@ from database import Connection
 from packet import Packet
 from packetTypes import PacketType
 from UserRepository import UserRepository, User
+from UserCurrencyRepository import UserCurrencyRepository, UserCurrency
+from ItemRepository import ItemRepository, Item
+from UserEquipmentRepository import UserEquipmentRepository, UserEquipment
 
 class PacketHandler:
 
     def __init__(self, server, cursor):
         self.cursor = cursor
         self.server = server
+        self.userEquipmentRepository = UserEquipmentRepository()
+        self.userCurrencyRepository = UserCurrencyRepository()
+        self.itemRepository = ItemRepository()
         self.userRepository = UserRepository()
 
     def handle(self, packet, client_ip, client_port):
