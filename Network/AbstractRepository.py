@@ -75,7 +75,7 @@ class AbstractRepository:
 
 
         for i in range(len(arr)):
-            if not arr[keys[i]] == '':
+            if arr[keys[i]] not in ['', None]:
                 new_keys.append(keys[i])
                 new_values.append(arr[keys[i]])
 
