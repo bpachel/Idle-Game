@@ -2,10 +2,10 @@ from AbstractRepository import AbstractRepository
 
 class User:
     def __init__(self):
-        self.id = ""
-        self.username = ""
-        self.password = ""
-        self.email = ""
+        self.id         = None
+        self.username   = None
+        self.password   = None
+        self.email      = None
 
 class UserRepository(AbstractRepository):
 
