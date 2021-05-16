@@ -1,4 +1,4 @@
-from currency import *
+from data_types import Currency
 from decimal import Decimal
 
 class ActiveAttribute:
@@ -7,7 +7,7 @@ class ActiveAttribute:
         self.name = nazwa
         self.exp_to_next_level = Decimal(50)
         self.level = Decimal(0)
-        self.points = Decimal(0) #nazwa uzywana w klasie Adventure
+        self.points = Decimal(0)
         self.currency = currency
 
 class PassiveAttribute:
@@ -17,7 +17,7 @@ class PassiveAttribute:
         self.exp_to_next_level = Decimal(50)
         self.level = Decimal(0)             #trzeba ten atrybut?
         self.max = Decimal(max)
-        self.actual = Decimal(100)  #nazwa uzywana w klasie Adventure
+        self.actual = Decimal(100)
 
     #def increaseMax(self, increment):
     #   self.max += increment
@@ -26,7 +26,7 @@ class PassiveAttribute:
 class Hero:
     def __init__(self,name):
         #nazwa
-        self.name=name
+        self.name = name
         #waluty
         self.currency_might = Currency(0,'might_exp')
         self.currency_cunning = Currency(0,'cunning_exp')
@@ -34,7 +34,7 @@ class Hero:
         self.currency_lore = Currency(0,'lore_exp')
         self.treasures = Currency(0,'treasure')
         self.riches = Currency(0,'gold')
-        self.gold_to_spend=self.treasures + self.riches
+        '''self.gold_to_spend = self.treasures + self.riches''' #todo? nigdzie niezdefinowona operacja typów
         #atrybuty czynne
         self.might = ActiveAttribute('Might', self.currency_might)
         self.cunning = ActiveAttribute('Cunning', self.currency_cunning)
@@ -61,11 +61,8 @@ class Hero:
         self.set=[self.weapon,self.helmet,self.armor,self.ring]
         self.updateActiveAttributes()
 
-    def getChallengeReward(self, challenge_reward):
-        #otrzymanie nagrody za ukonczony challenge, nazwa metody taka?? uzyta w klasie Adventura
-        pass
-
-    def getAdventureReward(self, adventure_reward):
+    def applyReward(self, reward):
+        #otrzymanie nagrody za ukonczony challenge/adventure
         pass
     
     #Zaktualizowanie statystyk o wartosci zalozonych przedmiotow
@@ -114,7 +111,6 @@ class Hero:
             
     
 class Item:
-    
     def __init__(self,name,type,minimum=[0,0,0,0],m=0,c=0,p=0,l=0):
         self.name=name
         self.type=type
