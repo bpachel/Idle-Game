@@ -61,7 +61,7 @@ class Packet:
             self.data = self.data[4:]
             type = type[0]
         except:
-            print ('No mote data.');
+            print ('No more data.');
             return None
         
         if type == self.__data_type['int']:
