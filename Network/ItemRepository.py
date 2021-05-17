@@ -70,7 +70,7 @@ class ItemRepository(AbstractRepository):
 
     def findOneBy(self, arr):
         result = self.findBy(arr)
-        if len(result) > 0:
+        if not result is None and len(result) > 0:
             return result[0]
         return None
 
@@ -82,7 +82,7 @@ class ItemRepository(AbstractRepository):
 
 if __name__ == "__main__":
 
-    itemRepository = ItemRepository(True)
+    itemRepository = ItemRepository()
 
     item = Item()
     item.name           = "Dziadek do orzechow"
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     item.cunning        = 2
     item.psyche         = 1
     item.lore           = 1
-    itemRepository.add(item)
+    #itemRepository.add(item)
     
     item = Item()
     item.name           = "Durszlak Spaczenia"
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     item.cunning        = 13
     item.psyche         = 8
     item.lore           = 0
-    itemRepository.add(item)
+    #itemRepository.add(item)
 
     for item in itemRepository.findAll():
         print (item.id, item.name, item.type,

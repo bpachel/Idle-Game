@@ -54,6 +54,7 @@ class AbstractRepository:
             self.querry = (self.querry  + " AND {} = {}" ).format(keys[i], arr[keys[i]])
         
         try:
+            #print ("DEBUG:", self.querry)
             self.cursor.execute(self.querry)
         except Exception as e:
             print(self.querry)
@@ -77,7 +78,12 @@ class AbstractRepository:
                 new_keys.append(keys[i])
                 new_values.append(arr[keys[i]])
 
-        if arr['id'] == None:
+        id_arr = { key:value for (key,value) in arr.items() if key.find("id") != -1 and value != None }
+
+        exist = []
+        exist = self._findBy( arr )
+
+        if id_arr == {} or exist == []:
             self.querry = "INSERT INTO `{}` (`{}`" + ((", `{}`")*(len(new_keys)-1)) + ")"
             self.querry = self.querry.format(self.name, *new_keys)
 
@@ -85,23 +91,37 @@ class AbstractRepository:
             self.querry = self.querry.format(*new_values)
         else:
             values = []
+            values_id = []
+            arr_len = 0
             for k, v in arr.items():
+                if v == None:
+                    continue
                 values.append(k)
                 values.append(v)
+                arr_len = arr_len + 1
+
+            for k, v in id_arr.items():
+                if v == None:
+                    continue
+                values_id.append(k)
+                values_id.append(v)
 
             self.querry = "UPDATE {} SET ".format(self.name)
-            self.querry = self.querry + ("`{}`={}" + ", `{}`={}"* (len(arr)-1)).format(*values)
+            self.querry = self.querry + ("`{}`={}" + ", `{}`={}"* (arr_len-1)).format(*values)
 
-            self.querry = self.querry + " WHERE id={}".format(arr['id'])
+            self.querry = self.querry + (" WHERE `{}`={}" + " AND `{}`={}" * (len(id_arr)-1))
+            self.querry = self.querry.format( *values_id )
 
         try:
-            print (self.querry)
+            #print ("DEBUG:", self.querry)
             self.cursor.execute(self.querry)
         except Exception as e:
             print(self.querry)
             print ("failed.")
             print(e)
             return False
+        finally:
+            return True
 
         query = "SELECT last_insert_rowid()"
         self.cursor.execute(query)

@@ -137,7 +137,7 @@ class PacketHandler:
 
             for item in userEquipment:
                 outgoing_packet.add( int(item.item_id) )
-                outgoing_packet.add( 1 if item.equipped == "True" else 0 )
+                outgoing_packet.add( item.equipped )
             
             return outgoing_packet
 
@@ -145,20 +145,21 @@ class PacketHandler:
             outgoing_packet = Packet(PacketType.GET_ITEM_INFO)
             item_id = packet.get()
 
-            item = itemRepository.findOneBy({"item_id" : item_id})
+            item = self.itemRepository.findOneBy({"id" : item_id})
             if item == None:
                 return outgoing_packet
 
-            outgoing_packet.add( userEquipment.name )
-            outgoing_packet.add( userEquipment.type )
-            outgoing_packet.add( Decimal(userEquipment.req_might) )
-            outgoing_packet.add( Decimal(userEquipment.req_cunning) )
-            outgoing_packet.add( Decimal(userEquipment.req_psyche) )
-            outgoing_packet.add( Decimal(userEquipment.req_lore) )
-            outgoing_packet.add( Decimal(userEquipment.might) )
-            outgoing_packet.add( Decimal(userEquipment.cunning) )
-            outgoing_packet.add( Decimal(userEquipment.psyche) )
-            outgoing_packet.add( Decimal(userEquipment.lore) )
+            outgoing_packet.add( item.name )
+            outgoing_packet.add( item.type )
+            outgoing_packet.add( Decimal(item.req_might) )
+            outgoing_packet.add( Decimal(item.req_cunning) )
+            outgoing_packet.add( Decimal(item.req_psyche) )
+            outgoing_packet.add( Decimal(item.req_lore) )
+            outgoing_packet.add( Decimal(item.might) )
+            outgoing_packet.add( Decimal(item.cunning) )
+            outgoing_packet.add( Decimal(item.psyche) )
+            outgoing_packet.add( Decimal(item.lore) )
+            print("itemlore", item.lore)
             
             return outgoing_packet
 
@@ -166,27 +167,24 @@ class PacketHandler:
             outgoing_packet = Packet(PacketType.SAVE_STATS)
             user = self.server.get_user(client_ip, client_port)
             if (user == None):
+                outgoing_packet.add(0)
                 return outgoing_packet
                 
             userCurrency = UserCurrency()
-            userCurrency.user_id = user.id
+            userCurrency.user_id = user[0].id
             userCurrency.might = str( packet.get() )
             userCurrency.cunning = str( packet.get() )
             userCurrency.psyche = str( packet.get() )
             userCurrency.lore = str( packet.get() )
             userCurrency.gold = str( packet.get() )
             userCurrency.treasure = str( packet.get() )
-            userCurrency.might = str( packet.get() )
-            userCurrency.cunning = str( packet.get() )
-            userCurrency.psyche = str( packet.get() )
-            userCurrency.lore = str( packet.get() )
             userCurrency.stamina = str( packet.get() )
             userCurrency.health = str( packet.get() )
             userCurrency.ploy = str( packet.get() )
             userCurrency.spirit = str( packet.get() )
             userCurrency.clarity = str( packet.get() )
             
-            if userCurrencyRepository.add( userCurrency ): #TODO
+            if self.userCurrencyRepository.add( userCurrency ):
                 outgoing_packet.add(1)
             else:
                 outgoing_packet.add(0)
@@ -201,25 +199,17 @@ class PacketHandler:
 
             n = packet.get()
 
-            if userEquipmentRepository.delete_old_items( user.id ): #TODO
+            if self.userEquipmentRepository.delete_old_items( user[0].id ): #TODO
                 outgoing_packet.add(0)
                 return outgoing_packet
 
             for i in range(n):
                 userEquipment = UserEquipment()
-                userEquipment.user_id = user.id
-                userEquipment.name = packet.get()
-                userEquipment.type = packet.get()
-                userEquipment.req_might = str(packet.get())
-                userEquipment.req_cunning = str(packet.get())
-                userEquipment.req_psyche = str(packet.get())
-                userEquipment.req_lore = str(packet.get())
-                userEquipment.might = str(packet.get())
-                userEquipment.cunning = str(packet.get())
-                userEquipment.psyche = str(packet.get())
-                userEquipment.lore = str(packet.get())
+                userEquipment.item_id = int(packet.get())
+                userEquipment.user_id = user[0].id
+                userEquipment.equipped = int(packet.get())
                 
-                if userEquipmentRepository.update( userEquipment ) == False: #TODO
+                if not self.userEquipmentRepository.add( userEquipment ):
                     outgoing_packet.add(0)
                     return outgoing_packet
 

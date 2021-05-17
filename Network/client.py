@@ -113,8 +113,7 @@ class Client:
                 str 'password'
                 str 'email'
             Returns
-                Packet
-                    int
+                int
                     '0' - failed
                     '1' - success
         """
@@ -140,8 +139,7 @@ class Client:
                 str 'username'
                 str 'password'
             Returns
-                Packet
-                    int
+                int
                     '0' - failed
                     '1' - success
         """
@@ -164,8 +162,7 @@ class Client:
             Parameters:
                 None
             Returns
-                Packet
-                    int
+                int
                     '0' - failed
                     '1' - success
         """
@@ -184,7 +181,7 @@ class Client:
         """
             Get User Stats
             [Must be logged in]
-            Arguments:
+            Parameters:
                 None
             Return dict
                 Decimal 'might'
@@ -226,7 +223,7 @@ class Client:
         """
             Get User Items
             [Must be logged in]
-            Arguments:
+            Parameters:
                 None
             Returns
                 array [ tuple ]
@@ -251,6 +248,108 @@ class Client:
         
         return items
 
+    def get_item_info(self, item_id):
+        """
+            Get Item Details
+            [Must be logged in]
+            Parameters:
+                int item_id
+            Returns: dict
+                str 'name'
+                str 'type'
+                Decimal 'req_might'
+                Decimal 'req_cunning'
+                Decimal 'req_psyche'
+                Decimal 'req_lore'
+                Decimal 'might'
+                Decimal 'cunning'
+                Decimal 'psyche'
+                Decimal 'lore'
+        """
+        packet = Packet(PacketType.GET_ITEM_INFO)
+        packet.add(item_id)
+        self.send(packet)
+
+        packet = self.__listen(PacketType.GET_ITEM_INFO)
+
+        return {
+            'name' : packet.get(),
+            'type' : packet.get(),
+            'req_might' : packet.get(),
+            'req_cunning' : packet.get(),
+            'req_psyche' : packet.get(),
+            'req_lore' : packet.get(),
+            'might' : packet.get(),
+            'cunning' : packet.get(),
+            'psyche' : packet.get(),
+            'lore' : packet.get()
+        }
+        
+        return items
+
+    def save_stats(self, stats):
+        """
+            Save Stats to Database
+            Parameters:
+                dict:
+                    Decimal 'might'
+                    Decimal 'cunning'
+                    Decimal 'psyche'
+                    Decimal 'lore'
+                    Decimal `gold`
+                    Decimal `treasure`
+                    Decimal `stamina`
+                    Decimal `health`
+                    Decimal `ploy`
+                    Decimal `spirit`
+                    Decimal `clarity`
+            Returns:
+                int
+                    '0' - failed
+                    '1' - success
+        """
+        packet = Packet(PacketType.SAVE_STATS)
+        packet.add(stats['might'])
+        packet.add(stats['cunning'])
+        packet.add(stats['psyche'])
+        packet.add(stats['lore'])
+        packet.add(stats['gold'])
+        packet.add(stats['treasure'])
+        packet.add(stats['stamina'])
+        packet.add(stats['health'])
+        packet.add(stats['ploy'])
+        packet.add(stats['spirit'])
+        packet.add(stats['clarity'])
+        self.send(packet)
+
+        packet = self.__listen(PacketType.SAVE_STATS)
+        return packet.get()
+
+    def save_items(self, items):
+        """
+            Save Stats to Database
+            Parameters:
+                array
+                    dict
+                        int : item_id
+                        int : equipped
+            Returns:
+                int
+                    '0' - failed
+                    '1' - success
+        """
+        packet = Packet(PacketType.SAVE_ITEMS)
+
+        packet.add( len(items) )
+
+        for item in items:
+            packet.add(item['item_id'])
+            packet.add(item['equipped'])
+
+        self.send(packet)
+
+        packet = self.__listen(PacketType.SAVE_ITEMS)
+        return packet.get()  
 
 if __name__ == "__main__":
     import random
@@ -295,9 +394,47 @@ if __name__ == "__main__":
     items = client.get_items()
     if items:
         for k, v in items:
+            print ('v: ', v, ", ", v.__class__.__name__)
             print('[{}]: {}'.format(k, 'equipped' if v else 'in bags'))
+
+    # Pobranie szczegolow itemu
+    if items:
+        unique_item_id = set() # set zeby nie pobierac kilka razy tego samego
+        for k, v in set(items):
+            unique_item_id.add(k)
+
+        for item_id in unique_item_id:
+            item_info = client.get_item_info(item_id)
+            print(item_info)
+
+    # Zapisanie statystyk
     
+    if client.save_stats({
+        'gold' : 100,
+        'treasure' : 2,
+        'might' : 6,
+        'cunning' : 8,
+        'psyche' : 12,
+        'lore' : 24,
+        'stamina' : 254,
+        'health' : 1280,
+        'ploy' : 13,
+        'spirit' : 8,
+        'clarity' : 6
+    }):
+        print ("save_stats success.")
+    else:
+        print ("save_stats failed.")
     
+    if client.save_items([
+        { "item_id" : 1, "equipped" : 0},
+        { "item_id" : 2, "equipped" : 0},
+        { "item_id" : 1, "equipped" : 0},
+        { "item_id" : 1, "equipped" : 1}
+    ]):
+        print ("save_items success.")
+    else:
+        print ("save_items failed.")
     
     
     
