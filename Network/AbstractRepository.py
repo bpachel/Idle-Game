@@ -73,19 +73,27 @@ class AbstractRepository:
         new_keys = []
         new_values = []
 
-
         for i in range(len(arr)):
             if arr[keys[i]] not in ['', None]:
                 new_keys.append(keys[i])
                 new_values.append(arr[keys[i]])
 
-        self.querry = "INSERT INTO `{}` (`{}`" + ((", `{}`")*(len(new_keys)-1)) + ")"
-        self.querry = self.querry.format(self.name, *new_keys)
+        if arr['id'] == None:
+            self.querry = "INSERT INTO `{}` (`{}`" + ((", `{}`")*(len(new_keys)-1)) + ")"
+            self.querry = self.querry.format(self.name, *new_keys)
 
-        self.querry = self.querry + " VALUES (\"{}\"" + ((", \"{}\"")*(len(new_keys)-1)) + ")"
-        self.querry = self.querry.format(*new_values)
+            self.querry = self.querry + " VALUES (\"{}\"" + ((", \"{}\"")*(len(new_keys)-1)) + ")"
+            self.querry = self.querry.format(*new_values)
+        else:
+            values = []
+            for k, v in arr.items():
+                values.append(k)
+                values.append(v)
 
-        # VALUES (1)"
+            self.querry = "UPDATE {} SET ".format(self.name)
+            self.querry = self.querry + ("`{}`={}" + ", `{}`={}"* (len(arr)-1)).format(*values)
+
+            self.querry = self.querry + " WHERE id={}".format(arr['id'])
 
         try:
             self.cursor.execute(self.querry)
