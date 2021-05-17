@@ -6,6 +6,11 @@ class User:
         self.username   = None
         self.password   = None
         self.email      = None
+    
+    def __eq__(self, other):
+        if isinstance(other, User):
+            return self.id == other.id
+        return False
 
 class UserRepository(AbstractRepository):
 
@@ -55,13 +60,21 @@ class UserRepository(AbstractRepository):
 
     def add(self, object):
         if object.__class__.__name__ == "User":
-            self._add(object)
+            return self._add(object)
         else:
             raise TypeError
 
 if __name__ == "__main__":
     
-    userRepository = UserRepository(True)
+    reset = True
+
+    from UserCurrencyRepository import UserCurrencyRepository
+    userCurrencyRepository = UserCurrencyRepository(reset)
+
+    from UserEquipmentRepository import UserEquipmentRepository
+    userEquipmentRepository = UserEquipmentRepository(reset)
+
+    userRepository = UserRepository(reset)
 
     user = User()
     user.username = "qwe"
@@ -80,6 +93,6 @@ if __name__ == "__main__":
     for user in userRepository.findAll():
         print (user.id, user.username, user.password, user.email)
 
-    user = userRepository.findOneBy({"id" : 1})
-    print (user.id, user.username, user.password, user.email)
+    #user = userRepository.findOneBy({"id" : 1})
+    #print (user.id, user.username, user.password, user.email)
     #print ( list(user.__dict__.keys() ))

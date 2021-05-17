@@ -46,22 +46,32 @@ class PacketHandler:
             
             user = self.userRepository.findOneBy({"username":login})
 
-            print("DEBUG: Hashed Password ->", user.password)
+            if user != None:
+                print("DEBUG: Hashed Password ->", user.password)
 
-            if bcrypt.checkpw(password.encode(), user.password.encode()):
-                print("DEBUG: Login Success.")
-                outgoing_packet.add(1)
+                if bcrypt.checkpw(password.encode(), user.password.encode()):
+                    user_data = [user, client_ip, client_port]
+                    if not user_data in self.server.users:
+                        print("DEBUG: Login Success.")
+                        outgoing_packet.add(1)
+                        self.server.users.append([user, client_ip, client_port])
+                        print(self.server.users)
+                        return outgoing_packet
+                    else:
+                        self.server.users.remove(user_data)
                 
-                self.server.users.emplace([user, client_ip, client_port])
-            else:
-                print("DEBUG: Login Failed.")
-                outgoing_packet.add(0)
+            print("DEBUG: Login Failed.")
+            outgoing_packet.add(0)
 
         elif type == PacketType.LOGOUT:
+            outgoing_packet = Packet(PacketType.LOGOUT)
             user = self.server.get_user(client_ip, client_port)
-            if not user == None:
+            if user != None:
                 self.server.users.remove(user)
+                outgoing_packet.add(1)
 
+            outgoing_packet.add(0)
+            
         elif type == PacketType.REGISTER:
             outgoing_packet = Packet(PacketType.REGISTER)
             login = packet.get()
@@ -79,6 +89,15 @@ class PacketHandler:
             result = self.userRepository.add(user)
 
             if result:
+                
+                userCurrency = UserCurrency()
+                userCurrency.user_id = result
+                self.userCurrencyRepository.add( userCurrency )
+
+                userEquipment = UserEquipment()
+                userEquipment.user_id = result
+                self.userEquipmentRepository.add( userEquipment )
+
                 outgoing_packet.add(1)
             outgoing_packet.add(0)
 
@@ -88,7 +107,7 @@ class PacketHandler:
             if (user == None):
                 return outgoing_packet
 
-            userCurrency = userCurrencyRepository.findOneBy({"user_id" : user.id})
+            userCurrency = self.userCurrencyRepository.findOneBy({"user_id" : user[0].id})
             outgoing_packet.add( Decimal( userCurrency.gold ) )
             outgoing_packet.add( Decimal( userCurrency.treasure ) )
             outgoing_packet.add( Decimal( userCurrency.might ) )
@@ -108,15 +127,17 @@ class PacketHandler:
             user = self.server.get_user(client_ip, client_port)
             if (user == None):
                 return outgoing_packet
-
-            userEquipment = userEquipmentRepository.findBy({"user_id" : user.id})
+        
+            userEquipment = self.userEquipmentRepository.findBy({"user_id" : user[0].id})
             if userEquipment == None:
+                outgoing_packet.add(0)
                 return outgoing_packet
 
-            packet.add( int(len(userEquipment)) )
+            outgoing_packet.add( int(len(userEquipment)) )
 
             for item in userEquipment:
-                outgoing_packet.add( int(userEquipment.item_id) )
+                outgoing_packet.add( int(item.item_id) )
+                outgoing_packet.add( 1 if item.equipped == "True" else 0 )
             
             return outgoing_packet
 
@@ -165,7 +186,7 @@ class PacketHandler:
             userCurrency.spirit = str( packet.get() )
             userCurrency.clarity = str( packet.get() )
             
-            if userCurrencyRepository.update( userCurrency ): #TODO
+            if userCurrencyRepository.add( userCurrency ): #TODO
                 outgoing_packet.add(1)
             else:
                 outgoing_packet.add(0)
@@ -180,8 +201,6 @@ class PacketHandler:
 
             n = packet.get()
 
-                
-            
             if userEquipmentRepository.delete_old_items( user.id ): #TODO
                 outgoing_packet.add(0)
                 return outgoing_packet
@@ -200,7 +219,7 @@ class PacketHandler:
                 userEquipment.psyche = str(packet.get())
                 userEquipment.lore = str(packet.get())
                 
-                if userEquipmentRepository.update( userCurrency ) == False: #TODO
+                if userEquipmentRepository.update( userEquipment ) == False: #TODO
                     outgoing_packet.add(0)
                     return outgoing_packet
 

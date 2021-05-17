@@ -150,11 +150,15 @@ class PacketType(Enum):
     """
     SAVE_ITEMS          = 9
 
+
     """
         Logout from server
-        Arguments:
+        Parameters:
             None
-        Return Packet
-            None
+        Returns
+            Packet
+                int
+                '0' - failed
+                '1' - success
     """
     LOGOUT               = 10
