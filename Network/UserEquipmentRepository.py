@@ -51,37 +51,54 @@ class UserEquipmentRepository(AbstractRepository):
 
     def findOneBy(self, arr):
         result = self.findBy(arr)
-        if len(result) > 0:
+        if not result is None and len(result) > 0:
             return result[0]
         return None
 
     def add(self, object):
         if object.__class__.__name__ == "UserEquipment":
-            self._add(object)
+            return self._add(object)
         else:
             raise TypeError
+
+    def delete_old_items(self, user_id):
+        querry = "DELETE FROM {} WHERE `user_id` = {}".format(self.name, user_id)
+        try:
+            self.cursor.execute(querry)
+        except Exception as e:
+            print(querry)
+            print ("failed.")
+            print(e)
 
 if __name__ == "__main__":
 
     userEquipmentRepository = UserEquipmentRepository(True)
 
     userEquipment = UserEquipment()
-    userEquipment.user_id = 1
+    userEquipment.user_id = 18
     userEquipment.item_id = 1
     userEquipment.equipped = True
     userEquipmentRepository.add(userEquipment)
 
     userEquipment = UserEquipment()
-    userEquipment.user_id = 1
+    userEquipment.user_id = 18
     userEquipment.item_id = 2
     userEquipment.equipped = True
     userEquipmentRepository.add(userEquipment)
 
     userEquipment = UserEquipment()
-    userEquipment.user_id = 1
+    userEquipment.user_id = 18
     userEquipment.item_id = 2
     userEquipment.equipped = False
     userEquipmentRepository.add(userEquipment)
+    
+    userEquipment = UserEquipment()
+    userEquipment.user_id = 18
+    userEquipment.item_id = 2
+    userEquipment.equipped = False
+    userEquipmentRepository.add(userEquipment)
+
+    userEquipmentRepository.delete_old_items(1)
 
     for item in userEquipmentRepository.findAll():
         print (item.id, item.user_id, item.item_id, item.equipped)

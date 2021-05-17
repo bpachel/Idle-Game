@@ -43,7 +43,6 @@ class AbstractRepository:
         if arr == {}:
             return self.getAll()
 
-
         keys = list(arr.keys())
 
         self.querry = """
@@ -96,13 +95,19 @@ class AbstractRepository:
             self.querry = self.querry + " WHERE id={}".format(arr['id'])
 
         try:
+            print (self.querry)
             self.cursor.execute(self.querry)
         except Exception as e:
             print(self.querry)
             print ("failed.")
             print(e)
             return False
-        return True
+
+        query = "SELECT last_insert_rowid()"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+
+        return result[0][0]
 
 if __name__ == "__main__":
     ar = AbstractRepository()

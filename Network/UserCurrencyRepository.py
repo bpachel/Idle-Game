@@ -77,13 +77,13 @@ class UserCurrencyRepository(AbstractRepository):
 
     def findOneBy(self, arr):
         result = self.findBy(arr)
-        if len(result) > 0:
+        if not result is None and len(result) > 0:
             return result[0]
         return None
 
     def add(self, object):
         if object.__class__.__name__ == "UserCurrency":
-            self._add(object)
+            return self._add(object)
         else:
             raise TypeError
 
