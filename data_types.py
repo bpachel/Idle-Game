@@ -291,7 +291,156 @@ class Currency():
     __rmul__ = __mul__
     __radd__ = __add__
 
+class PassiveAttribute(Currency):
+    '''
+    Operatory zarządzają obecnym poziomem atrybutu val.
+    Jego maksymalny poziom, max trzeba zmieniać poprzez odwołania do atrybutu.
 
+    '''
+    def __init__(self, val=0, type='Spirit'):
+        self.type = type
+        self.val = Decimal(val)
+        self.max = Decimal(val)
+
+    def __str__(self):
+        return str(self.type) + "Max: " + str(self.max) + "Current: " + str(self.val)
+
+    def __mul__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return Currency(self.val*other.val, self.type)
+            else:
+                raise TypeError
+        elif isinstance(other, Multipier):
+            return Currency(self.val * other.val, self.type)
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return Currency(self.val * other, self.type)
+        else:
+            raise TypeError
+
+    def __add__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return Currency(self.val+other.val, self.type)
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return Currency(self.val+other, self.type)
+        else:
+            raise TypeError
+
+    def __sub__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return Currency(self.val-other.val, self.type)
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return Currency(self.val-other, self.type)
+        else:
+            raise TypeError
+
+    def __rsub__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return Currency(other.val - self.val, self.type)
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return Currency(other - self.val, self.type)
+        else:
+            raise TypeError
+
+    def __truediv__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return Currency(self.val/other.val, self.type)
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return Currency(self.val/other, self.type)
+        else:
+            raise TypeError
+
+    def __rtruediv__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return Currency(other.val/self.val, self.type)
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return Currency(other/self.val, self.type)
+        else:
+            raise TypeError
+
+    def __lt__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return self.val < other.val
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return self.val < other
+        else:
+            raise TypeError
+
+    def __le__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return self.val <= other.val
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return self.val <= other
+        else:
+            raise TypeError
+
+    def __eq__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return self.val == other.val
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return self.val == other
+        else:
+            raise TypeError
+
+    def __ne__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return self.val != other.val
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return self.val != other
+        else:
+            raise TypeError
+
+    def __gt__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return self.val > other.val
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return self.val > other
+        else:
+            raise TypeError
+
+    def __ge__(self, other):
+        if isinstance(other, Currency):
+            if other.type == self.type:
+                return self.val >= other.val
+            else:
+                raise TypeError
+        elif isinstance(other, Decimal) or isinstance(other, int):
+            return self.val >= other
+        else:
+            raise TypeError
+
+    __rmul__ = __mul__
+    __radd__ = __add__
 
 
 if __name__ == '__main__':
