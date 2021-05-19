@@ -11,19 +11,19 @@ class CurrencyContainer:
 
         if forclass == 'Challenge':
             self.exp = [Currency(Decimal(random.randrange(100, 300, 1) / 100) * dif_level[i], i) for i in range(4)]
-            self.gold = Currency(Decimal(random.randrange(200, 500, 1) / 100) * sum(dif_level), 'gold')
+            self.riches = Currency(Decimal(random.randrange(200, 500, 1) / 100) * sum(dif_level), 'gold')
             self.treasures = Currency(0, 'treasure')
 
         # nagrody 3-5 razy wieksze niz w challenge
         if forclass == 'Adventure':
             self.exp = [Currency(Decimal(random.randrange(300, 1500, 1) / 100) * dif_level[i], i) for i in range(4)]
-            self.gold = Currency(Decimal(random.randrange(600, 2500, 1) / 100) * sum(dif_level), 'gold')
+            self.riches = Currency(Decimal(random.randrange(600, 2500, 1) / 100) * sum(dif_level), 'gold')
             self.treasures = Currency(0, 'treasure')
 
         # interfejs wypisuje tylko niezerowe nagrody
         self.print_list = [i for i in self.exp if i.val > Decimal(0)]
-        if self.gold.val > Decimal(0):
-            self.print_list.append(self.gold)
+        if self.riches.val > Decimal(0):
+            self.print_list.append(self.riches)
         if self.treasures.val > Decimal(0):
             self.print_list.append(self.treasures)
 
@@ -53,31 +53,38 @@ challenge_names = ["Wyzwanie1", "Walka z niedzwiedziem", "Przeplyniecie rzeki"]
 adventure_names = ["Przygoda1", "Wyprawa w gory"]
 
 
-class ObozException(Exception):
+class CampException(Exception):
     pass
 
 
 class Challenge:  # wyzwanie
     def __init__(self, dif_level):
-        self.name = random.choice(challenge_names);
+        self.name = random.choice(challenge_names)
         self.difficulty = [Decimal(random.randrange(50, 150, 1) / 100) * dif_level[i] for i in range(4)]
         self.reward = Reward(self.difficulty, 'Challenge')
         # self.type = type            #[False,False,False,False]
+        #testowane 4 atrybuty aktywne
         self.cost = [Decimal(random.randrange(50, 100, 1) / 500) * self.difficulty[i] for i in range(4)]
+        #piaty atrybut nieodpowiadajacy testowanym atrybutom todo balans
+        self.cost.append(Decimal(random.randrange(50, 100, 1) / 1800) * sum(dif_level))
 
+    '''true if completed challenge, false if not'''
     def onClock(self, bohater):
-        temp_list = [bohater.passive[i].actual - self.cost[i] for i in range(4)]
+        temp_list = [bohater.passive[i].val - self.cost[i] for i in range(5)]
         for i in temp_list:
-            if i <= 0:
-                raise ObozException
-        self.difficulty = temp_list
+            if i < 0:
+                raise CampException
+        for i in range(5):
+            bohater.passive[i].val -= self.cost[i]
+        for i in bohater.passive:
+            if i.val == 0:
+                raise CampException
         for i in range(4):
-            if self.difficulty[i] - bohater.active[i].points > 0:
-                self.difficulty[i] -= bohater.active[i].points
+            if self.difficulty[i] - bohater.active[i].val > 0:
+                self.difficulty[i] -= bohater.active[i].val
             else:
                 self.difficulty[i] = 0
-        return self.difficulty == [0, 0, 0, 0]  # true if completed challenge
-        # todo zwracanie nagrody
+        return self.difficulty == [0, 0, 0, 0]
 
 
 class Adventure:  # przygoda
@@ -88,20 +95,23 @@ class Adventure:  # przygoda
         self.challenge_index = 0
         self.in_action = False
         self.reward = Reward(diff_level, 'Adventure')
-        # todo pasek postepu przygody - gdzie? czy rzeba dodatkowe parametry initial_cost, initial_difficulty?
+        # todo pasek postepu przygody - gdzie?
         # todo pasek postepu danego wyzwania - gdzie?
 
     def start(self):
         self.in_action = True
 
-    # '''Zwraca bool czy bohater moze kontynuowac przygode.'''
-    '''Zwraca bool czy przygoda zostala ukonczona.'''
+    def stop(self):
+        self.in_action = False
 
+    '''Zwraca bool czy przygoda zostala ukonczona. 
+    Zwraca blad ObozException jezeli trzeba zastopowac wszystkie przygody, bo wyczerpaly sie atrybuty pasywne.'''
+    #todo Wtedy trzeba w nadrzednej metodzie wywolac metode stop dla wszystkich przygod gracza.
     def onClock(self, bohater):
         if self.in_action:
             try:
                 if self.challenges[self.challenge_index].onClock(bohater):
-                    bohater.getChallengeReward(self.challenges[self.challenge_index].reward)
+                    bohater.applyReward(self.challenges[self.challenge_index].reward)
                     if self.challenge_index + 1 == self.amount:
                         self.challenge_index += 1
                         return False
@@ -109,41 +119,12 @@ class Adventure:  # przygoda
                         bohater.applyReward(self.reward)
                         self.in_action = False
                         return True
-            except ObozException:
+            except CampException:
                 raise  # do nadrzednej metody
+#todo czy probujemy wykonac nastepne wyzwania w nadziei, ze starczy na nie atr pasywnych, czy pomijamy to?
             except Exception as e:
                 print(e)
                 print("ADVENTURE EXCEPTION")
-        # todo zwracanie nagrody
-
-
-"""
-Work, Act
-Trening postaci odbywa się za pomocą akcji typu Work i Act z karty Main. 
-Trening odbywa się dwufazowo.
-	Pierwsza faza - niektóre akcje Work i Act zdobywają punkty doświadczenia
-	 po każdym użyciu. Doświadczenie to jest reprezentowane jako procentowa
-	  miara do następnego poziomu. Każde wykonanie akcji zwiększa ją 
-	  o2%, 4% lub 10% w zależności od złożoności czynności. 
-	  Gdy miara dojdzie do 100%, akcja wchodzi na nowy poziom, 
-	  z wyzerowaną miarą postępu.
-
-	Faza druga - część akcji Work i Act generują waluty doświadczenia, 
-	które można wykorzystać do aktywowania akcji upgrade zwiększających 
-	atrybuty postaci lub na zakup umiejętności postaci z karty Skills.
-"""
-
-
-class Work:
-    def __init__(self):
-        # wg specyfikacji przygoda blokuje wszystkie akcje work
-        pass
-
-
-class Act:
-    def __init__(self, block_on_adventure=True):
-        self.block_on_adventure = block_on_adventure
-        pass
 
 
 if __name__ == "__main__":
