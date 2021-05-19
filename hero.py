@@ -59,17 +59,57 @@ class Hero:
                 if it.min_attr[i] > self.active[i]:
                     raise Exception('You have too few ' + self.active[i].type + ' points to wear this item')
         if it.type == 'Weapon':
-            self.weapon = it
-            self.set[0] = it
+            if self.set[0] == None:
+                self.weapon = it
+                self.set[0] = it
+            else:
+                #usuwamy bonusy poprzedniego przedmiotu
+                self.might -= self.set[0].item_might
+                self.cunning -= self.set[0].item_cunning
+                self.psyche -= self.set[0].item_psyche
+                self.lore -= self.set[0].item_lore
+                #dopiero zamieniamy na nowy
+                self.weapon = it
+                self.set[0] = it
         elif it.type == 'Helmet':
-            self.helmet = it
-            self.set[1] = it
+            if self.set[1] == None:
+                self.helmet = it
+                self.set[1] = it
+            else:
+                #usuwamy bonusy poprzedniego przedmiotu
+                self.might -= self.set[1].item_might
+                self.cunning -= self.set[1].item_cunning
+                self.psyche -= self.set[1].item_psyche
+                self.lore -= self.set[1].item_lore
+                #dopiero zamieniamy na nowy
+                self.helmet = it
+                self.set[1] = it
         elif it.type == 'Armor':
-            self.armor = it
-            self.set[2] = it
+            if self.set[2] == None:
+                self.armor = it
+                self.set[2] = it
+            else:
+                #usuwamy bonusy poprzedniego przedmiotu
+                self.might -= self.set[2].item_might
+                self.cunning -= self.set[2].item_cunning
+                self.psyche -= self.set[2].item_psyche
+                self.lore -= self.set[2].item_lore
+                #dopiero zamieniamy na nowy
+                self.armor = it
+                self.set[2] = it
         elif it.type == 'Ring':
-            self.ring = it
-            self.set[3] = it
+            if self.set[3] == None:
+                self.ring = it
+                self.set[3] = it
+            else:
+                #usuwamy bonusy poprzedniego przedmiotu
+                self.might -= self.set[3].item_might
+                self.cunning -= self.set[3].item_cunning
+                self.psyche -= self.set[3].item_psyche
+                self.lore -= self.set[3].item_lore
+                #dopiero zamieniamy na nowy
+                self.ring = it
+                self.set[3] = it
         else:
             raise Exception('Not supported type of item')
         self.updateActiveAttributes()
@@ -98,10 +138,10 @@ class Item:
         for i in range(len(minimum)):
             self.min_attr.append(Decimal(minimum[i]))
 
-        self.item_might = Currency("Might", m)
-        self.item_cunning = Currency("Cunning", c)
-        self.item_psyche = Currency("Psyche", p)
-        self.item_lore = Currency('Lore', l)
+        self.item_might = Currency(m,"Might")
+        self.item_cunning = Currency(c,"Cunning")
+        self.item_psyche = Currency(p,"Psyche")
+        self.item_lore = Currency(l,'Lore')
         self.item_attr = [self.item_might, self.item_cunning, self.item_psyche, self.item_lore]
 
     # Ustawienie minimalnych atrybutow potrzebnych do zalozenia przedmiotu
@@ -202,10 +242,10 @@ if __name__ == '__main__':
     print('Wiecej przedmiotow nie wejdzie do eq niz jest w nim miejsca')
     print('')
     print('Rozdaje postaci jakies poczatkowe punkty umiejetnosci')
-    h1.might.currency += 10
-    h1.cunning.currency += 10
-    h1.psyche.currency += 10
-    h1.lore.currency += 10
+    h1.might.val += 10
+    h1.cunning.val += 10
+    h1.psyche.val += 10
+    h1.lore.val += 10
 
     h1.printHeroActive()
     print('')
@@ -222,6 +262,17 @@ if __name__ == '__main__':
     h1.printHeroPassive()
     print('A to ponizej nie zadziala bo nasz bohater nie ma wystarczajacej ilosci punktow')
     # h1.setActiveItem(i2)
+    print('Podmiana przedmiotu')
+    i3 = Item('Maaaczuga', 'Weapon')
+    i3.setMinAttr([1, 1, 1, 1])
+    i3.item_might = 1
+    i3.item_cunning = 1
+    i3.item_psyche = 1
+    i3.item_lore = 1
+    i3.printItem()
+    h1.setActiveItem(i3)
+    h1.printHeroActive()
+    print('Po zmianie usuney sie bonusy starej broni a zostaly dodane nowe')
 
     '''
     for i in h1.active:
