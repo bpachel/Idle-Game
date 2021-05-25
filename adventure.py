@@ -42,11 +42,44 @@ class ItemContainer:
             #losowanie typu przedmiotu
             type = random.choice(itemTypes)
 
-            #todo balans ???????????
-            #todo atrybuty aktywne wymagane do zalozenia
+            #klasa przedmiotu 75% zwykły, 15% rzadki, 9% mistrzowski, 1% legendarny
+            rarity = 0
+            rar = random.random()
+            if rar < 0.75:
+                rarity = 1
+            elif rar >=0.75 and rar < 0.9:
+                rarity = 1.25
+                name = 'Strong ' + name
+            elif rar >=0.9 and rar < 0.99:
+                rarity = 1.5
+                name = 'Masterwork ' + name
+            else:
+                rarity = 2
+                name = 'Legendary ' + name
 
-            #todo bonusy zalozonego itemu - 4 atrybuty aktywne w kolejnosci w liscie dif_level
-            self.items.append(Item(name, type, minimum=[0, 0, 0, 0], m=0, c=0, p=0, l=0))
+
+            #tablica pomocnicza do losowania atrybutów
+            tmp = [0,1,2,3]
+            atributes = [0,0,0,0]
+
+            #losowanie atrybutu wzmacnianego przez przedmiot
+            #losowanie i zapisanie bonusu
+            atributes[tmp.pop(random.randrange(len(tmp)))] = Decimal((random.randrange(5, 15, 1) / 50)*dif_level*rarity)
+            #sprawdzanie czy wzmacniany jest drugi atrybut, trzeci i czwarty
+            if random.random() < 0.4:
+                atributes[tmp.pop(random.randrange(len(tmp)))] = Decimal(
+                    (random.randrange(5, 15, 1) / 50) * dif_level * rarity)
+                if random.random() < 0.4:
+                    atributes[tmp.pop(random.randrange(len(tmp)))] = Decimal(
+                        (random.randrange(5, 15, 1) / 50) * dif_level * rarity)
+                    if random.random() < 0.4:
+                        atributes[tmp.pop(random.randrange(len(tmp)))] = Decimal(
+                            (random.randrange(5, 15, 1) / 50) * dif_level * rarity)
+
+            minimum = [0,0,0,0]
+            for i in range(4):
+                minimum[i] = (random.randrange(5, 15, 1) / 50)*dif_level
+            self.items.append(Item(name, type, minimum=minimum, m=atributes[0], c=atributes[1], p=atributes[2], l=atributes[3]))
 
 
 class Reward:
@@ -74,7 +107,7 @@ class CampException(Exception):
 class Challenge:  # wyzwanie
     def __init__(self, dif_level):
         self.name = random.choice(challenge_names)
-        self.difficulty = [Decimal(random.randrange(50, 150, 1) / 100) * dif_level[i] for i in range(4)]
+        self.difficulty = [Decimal(random.randrange(50, 150, 1) / 10) * dif_level[i] for i in range(4)]
         self.reward = Reward(self.difficulty, 'Challenge')
         # self.type = type            #[False,False,False,False]
         #testowane 4 atrybuty aktywne
@@ -141,4 +174,7 @@ class Adventure:  # przygoda
 
 
 if __name__ == "__main__":
-    pass
+    test_items = ItemContainer(10, 50)
+
+    for item in test_items.items:
+        print(item.name + ' ' + str(item.min_attr[0]))
