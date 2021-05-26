@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font as tkfont
 from Network.client import Client
+import hero
+import action
 
 
 class Application(tk.Tk):
@@ -16,6 +18,7 @@ class Application(tk.Tk):
             **kwargs: Arbitrary keyword arguments.
         """
         tk.Tk.__init__(self, *args, **kwargs)
+        self.hero = hero.Hero('Qwe')
 
         self.main_font = tkfont.Font(
             family='Helvetica', size=18, weight="bold")
@@ -83,7 +86,7 @@ class MenuView(tk.Frame):
         #                        command=lambda: controller.show_frame("GameView"))
 
         debug_btn = tk.Button(self, text="Debug Start", font=controller.main_font,
-                              command=lambda: controller.show_frame("GameView"))
+                              command=lambda: switch_to_game(self, controller))
         login_btn = tk.Button(self, text="Login", font=controller.main_font,
                               command=lambda: controller.show_frame("LoginView"))
         register_btn = tk.Button(self, text="Register", font=controller.main_font,
@@ -91,7 +94,7 @@ class MenuView(tk.Frame):
         exitGame_btn = tk.Button(self, text="Exit", font=controller.main_font,
                                  command=lambda: exit())
 
-        #some_lb.grid(row=2, column=2, sticky='nesw')
+        # some_lb.grid(row=2, column=2, sticky='nesw')
         debug_btn.grid(row=2, column=2, sticky='nesw')
         login_btn.grid(row=4, column=2, sticky='ew')
         register_btn.grid(row=5, column=2, sticky='ew')
@@ -120,84 +123,134 @@ class GameView(tk.Frame):
         """
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        self.entry_label_font = tkfont.Font(
-            family='Helvetica', size=12, weight='bold')
+        # self.entry_label_font = tkfont.Font(
+        #    family='Helvetica', size=12, weight='bold')
+
+        #  Pomocniczne zmienne
+        self.stamina = float(5)
+        #
+        self.game_font = tkfont.Font(
+            family='Helvetica', size=10, weight="bold")
 
         some_lb = tk.Label(self, text='Game', font=controller.main_font)
 
-        GameEndView_btn = tk.Button(self, text="finish game", font=controller.main_font,
-                                    command=lambda: controller.show_frame("GameEndView"))
+        tk.Label(self, text='Riches', bg='#ccfffc').grid(row=0, column=0, sticky="nwse", columnspan=2)
 
-        tk.Label(self, text='Other', bg='#ccfffc').grid(row=0, column=0, sticky="nwse")
-        tk.Label(self, text='Gold').grid(column=0, sticky="nwse")
-        tk.Label(self, text='Research').grid(row=2, column=0, sticky="nwse")
-        tk.Label(self, text='Arcaria').grid(row=3, column=0, sticky="nwse")
-        tk.Label(self, text='Herbs').grid(row=4, column=0, sticky="nwse")
-        tk.Label(self, text='Books', bg='#ccfffc').grid(row=5, column=0, sticky="nwse")
-        tk.Label(self, text='Scrolls').grid(row=6, column=0, sticky="nwse")
-        tk.Label(self, text='Cadices').grid(row=7, column=0, sticky="nwse")
-        tk.Label(self, text='Necromancy', bg='#ccfffc').grid(row=8, column=0, sticky="nwse")
-        tk.Label(self, text='Bones').grid(row=9, column=0, sticky="nwse")
-        tk.Label(self, text='Bone dust').grid(row=10, column=0, sticky="nwse")
-        tk.Label(self, text='Gems').grid(row=12, column=0, sticky="nwse")
-        tk.Label(self, text='Arcane gem').grid(row=13, column=0, sticky="nwse")
+        tk.Label(self, text='Gold:', anchor='w', font=self.game_font).grid(row=1, column=0, sticky="nwse")
+        self.gold_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.gold_value.grid(row=1, column=1, sticky="nwse")
 
-        tk.Label(self, text='Stamina').grid(row=0, column=4, sticky="nwse")
-        tk.Label(self, text='Hp').grid(row=1, column=4, sticky="nwse")
-        tk.Label(self, text='Spirit').grid(row=2, column=4, sticky="nwse")
-        tk.Label(self, text='Light').grid(row=3, column=4, sticky="nwse")
-        tk.Label(self, text='Mana').grid(row=4, column=4, sticky="nwse")
+        tk.Label(self, text='Treasures:', anchor='w', font=self.game_font).grid(row=2, column=0, sticky="nwse")
+        self.treasures_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.treasures_value.grid(row=2, column=1, sticky="nwse")
 
-        load_stamina = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='determinate')
-        load_stamina['value'] = load_stamina['maximum']
-        load_stamina.grid(row=0, column=5, sticky="we")
+        # Atrybuty
+        tk.Label(self, text='Active', bg='#ccfffc').grid(row=3, column=0, sticky="nwse", columnspan=2)
 
-        def stop():
-            load_stamina.stop()
-            load_stamina['value'] = load_stamina['maximum']
+        tk.Label(self, text='Might:', anchor='w', font=self.game_font).grid(row=4, column=0, sticky="nwse")
+        self.might_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.might_value.grid(row=4, column=1, sticky="nwse")
+        tk.Label(self, text='Cunning:', anchor='w', font=self.game_font).grid(row=5, column=0, sticky="nwse")
+        self.cunning_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.cunning_value.grid(row=5, column=1, sticky="nwse")
+        tk.Label(self, text='Psyche:', anchor='w', font=self.game_font).grid(row=6, column=0, sticky="nwse")
+        self.psyche_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.psyche_value.grid(row=6, column=1, sticky="nwse")
+        tk.Label(self, text='Lore:', anchor='w', font=self.game_font).grid(row=7, column=0, sticky="nwse")
+        self.lore_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.lore_value.grid(row=7, column=1, sticky="nwse")
 
-        def resetProgress():
-            load_stamina['value'] = load_stamina['maximum']
+        # Atrybuty
+        tk.Label(self, text='Passive', bg='#ccfffc').grid(row=9, column=0, sticky="nwse", columnspan=2)
 
-        def step(val):
-            step = val
-            load_stamina['value'] += step
+        tk.Label(self, text='Stamina:', anchor='w', font=self.game_font).grid(row=10, column=0, sticky="nwse")
+        self.stamina_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.stamina_value.grid(row=10, column=1, sticky="nwse")
+        tk.Label(self, text='Health:', anchor='w', font=self.game_font).grid(row=11, column=0, sticky="nwse")
+        self.health_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.health_value.grid(row=11, column=1, sticky="nwse")
+        tk.Label(self, text='Ploy:', anchor='w', font=self.game_font).grid(row=12, column=0, sticky="nwse")
+        self.ploy_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.ploy_value.grid(row=12, column=1, sticky="nwse")
+        tk.Label(self, text='Spirit:', anchor='w', font=self.game_font).grid(row=13, column=0, sticky="nwse")
+        self.spirit_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.spirit_value.grid(row=13, column=1, sticky="nwse")
+        tk.Label(self, text='Clarity:', anchor='w', font=self.game_font).grid(row=14, column=0, sticky="nwse")
+        self.clarity_value = tk.Label(self, text="0", font=self.game_font, anchor='e')
+        self.clarity_value.grid(row=14, column=1, sticky="nwse")
 
-        self.step = step
-        self.refresh()
+        # self.treasures_value['text'] = large_number_format('99955479574157')
+        # error_lb['text']
 
-        tk.Button(self, text='step', command=resetProgress).grid(row=1, column=5, sticky="nwse")
+        tk.Label(self, text='Stamina', bg='#ccfffc').grid(row=0, column=5, sticky="nwse", columnspan=2)
+        self.stamina_prbar = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='determinate')  # variable=?
+        self.stamina_prbar.grid(row=1, column=5, sticky="ew")
 
-        activity_names = ["Do chores", "Treat ailments", "Buy scroll",
-                          "Sell scroll", "Study", "rest", "Run errands"]
+        tk.Label(self, text='Health', bg='#ccfffc').grid(row=2, column=5, sticky="nwse", columnspan=2)
+        self.health_prbar = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='determinate')  # variable=?
+        self.health_prbar.grid(row=3, column=5, sticky="ew")
 
-        activity_btns = []
+        tk.Label(self, text='Ploy', bg='#ccfffc').grid(row=4, column=5, sticky="nwse", columnspan=2)
+        self.ploy_prbar = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='determinate')  # variable=?
+        self.ploy_prbar.grid(row=5, column=5, sticky="ew")
 
+        tk.Label(self, text='Spirit', bg='#ccfffc').grid(row=6, column=5, sticky="nwse", columnspan=2)
+        self.spirit_prbar = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='determinate')  # variable=?
+        self.spirit_prbar.grid(row=7, column=5, sticky="ew")
+
+        tk.Label(self, text='Clarity', bg='#ccfffc').grid(row=8, column=5, sticky="nwse", columnspan=2)
+        self.clarity_prbar = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='determinate')  # variable=?
+        self.clarity_prbar.grid(row=9, column=5, sticky="ew")
+
+        activity_names = ["Work", "Rest", "Adventure", "Challenge"]
+        self.activity_btns = []
         for i in range(len(activity_names)):
             b = tk.Button(self, text=activity_names[i])
-            activity_btns.append(b)
+            self.activity_btns.append(b)
 
         cols = 3
-        rows = len(activity_btns) // cols + (len(activity_btns) % cols > 0)
-
-        for i in range(len(activity_btns)):
-            c = i % cols + 1
+        rows = len(self.activity_btns) // cols + (len(self.activity_btns) % cols > 0)
+        for i in range(len(self.activity_btns)):
+            c = i % cols + 2
             r = i // cols
-            activity_btns[i].grid(
+            self.activity_btns[i].grid(
                 row=r, column=c, sticky="nwse", padx=2, pady=2)
 
         # some_lb.grid(row=0, column=0)
-        # GameEndView_btn.grid(row=1, column=0)
 
         for x in range(20):
             self.rowconfigure(x, weight=1)
         for y in range(10):
             self.columnconfigure(y, weight=1)
+        self.start()
+        self.refresh()
+
+    def start(self):
+        self.stamina_prbar['maximum'] = self.controller.hero.stamina.max
+        self.health_prbar['maximum'] = self.controller.hero.health.max
+        self.ploy_prbar['maximum'] = self.controller.hero.ploy.max
+        self.spirit_prbar['maximum'] = self.controller.hero.spirit.max
+        self.clarity_prbar['maximum'] = self.controller.hero.clarity.max
+
 
     def refresh(self):
         """Uaktualnij dane na stronie"""
-        self.step(-0.01)
-        self.after(1, self.refresh)
+        self.after(33, self.refresh)  # 30 fpsow
+        # rest = action.Rest([1, 1, 1, 1])
+        # rest.regeneration(self.controller.hero)
+
+        # update text
+        self.stamina_value['text'] = str(self.controller.hero.stamina.val)
+        self.health_value['text'] = str(self.controller.hero.health.val)
+        self.ploy_value['text'] = str(self.controller.hero.ploy.val)
+        self.spirit_value['text'] = str(self.controller.hero.spirit.val)
+        self.clarity_value['text'] = str(self.controller.hero.clarity.val)
+        # update progress bar
+        self.stamina_prbar['value'] = float(self.controller.hero.stamina.val)
+        self.health_prbar['value'] = float(self.controller.hero.health.val)
+        self.ploy_prbar['value'] = float(self.controller.hero.ploy.val)
+        self.spirit_prbar['value'] = float(self.controller.hero.spirit.val)
+        self.clarity_prbar['value'] = float(self.controller.hero.clarity.val)
 
     def reset(self):
         """Zresetuj stronę do stanu początkowego"""
@@ -380,7 +433,26 @@ def register(view, controller, username, password, email):
 
 
 def switch_to_game(view, controller):
+    view.reset()
     controller.show_frame("GameView")
+
+
+def large_number_format(number):
+    def _round(num, div, let=''):
+        return str(round(num / div, 2)) + let
+
+    number = int(str(number))  # z decimal do string do int
+
+    letters = ['K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oct', 'Non', 'Dec', 'Und', 'Duo']
+    i = len(letters) - 1
+    f = 999_999_999_999_999_999_999_999_999_999_999_999_999
+    div = 1_000_000_000_000_000_000_000_000_000_000_000_000_000
+    while i >= 0:
+        if number > f:
+            return _round(number, div, letters[i])
+        f, div, i = f // 1000, div // 1000, i - 1
+
+    return number
 
 
 def main():
