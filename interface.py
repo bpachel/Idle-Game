@@ -355,7 +355,7 @@ def login(view, controller, username, password):
     error_lb = tk.Label(view, text='Invalid username or password', font=controller.main_font)
     print(return_value)
     if return_value:
-        controller.show_frame("GameView")
+        switch_to_game(view, controller)
         error_lb.grid(row=0, column=2, sticky='ew')
     else:
         error_lb.grid(row=7, column=2, sticky='ew')
