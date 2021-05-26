@@ -78,10 +78,12 @@ class MenuView(tk.Frame):
         # x.place(x=0, y=0, relwidth=1, relheight=1)
         # x.image = bg_image
 
-        some_lb = tk.Label(self, text='Menu', font=controller.main_font)
+        # some_lb = tk.Label(self, text='Menu', font=controller.main_font)
         # newGame_btn = tk.Button(self, text="New Game", font=controller.main_font,
         #                        command=lambda: controller.show_frame("GameView"))
 
+        debug_btn = tk.Button(self, text="Debug Start", font=controller.main_font,
+                              command=lambda: controller.show_frame("GameView"))
         login_btn = tk.Button(self, text="Login", font=controller.main_font,
                               command=lambda: controller.show_frame("LoginView"))
         register_btn = tk.Button(self, text="Register", font=controller.main_font,
@@ -89,7 +91,8 @@ class MenuView(tk.Frame):
         exitGame_btn = tk.Button(self, text="Exit", font=controller.main_font,
                                  command=lambda: exit())
 
-        some_lb.grid(row=2, column=2, sticky='nesw')
+        #some_lb.grid(row=2, column=2, sticky='nesw')
+        debug_btn.grid(row=2, column=2, sticky='nesw')
         login_btn.grid(row=4, column=2, sticky='ew')
         register_btn.grid(row=5, column=2, sticky='ew')
         exitGame_btn.grid(row=6, column=2, sticky='ew')
