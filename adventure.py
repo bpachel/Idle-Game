@@ -64,21 +64,21 @@ class ItemContainer:
 
             #losowanie atrybutu wzmacnianego przez przedmiot
             #losowanie i zapisanie bonusu
-            atributes[tmp.pop(random.randrange(len(tmp)))] = Decimal((random.randrange(5, 15, 1) / 50)*dif_level*rarity)
+            atributes[tmp.pop(random.randrange(len(tmp)))] = Decimal((random.randrange(5, 15, 1) / 50)*dif_level[i]*rarity)
             #sprawdzanie czy wzmacniany jest drugi atrybut, trzeci i czwarty
             if random.random() < 0.4:
                 atributes[tmp.pop(random.randrange(len(tmp)))] = Decimal(
-                    (random.randrange(5, 15, 1) / 50) * dif_level * rarity)
+                    (random.randrange(5, 15, 1) / 50) * dif_level[i] * rarity)
                 if random.random() < 0.4:
                     atributes[tmp.pop(random.randrange(len(tmp)))] = Decimal(
-                        (random.randrange(5, 15, 1) / 50) * dif_level * rarity)
+                        (random.randrange(5, 15, 1) / 50) * dif_level[i] * rarity)
                     if random.random() < 0.4:
                         atributes[tmp.pop(random.randrange(len(tmp)))] = Decimal(
-                            (random.randrange(5, 15, 1) / 50) * dif_level * rarity)
+                            (random.randrange(5, 15, 1) / 50) * dif_level[i] * rarity)
 
             minimum = [0,0,0,0]
             for i in range(4):
-                minimum[i] = (random.randrange(5, 15, 1) / 50)*dif_level
+                minimum[i] = (random.randrange(5, 15, 1) / 50)*dif_level[i]
             self.items.append(Item(name, type, minimum=minimum, m=atributes[0], c=atributes[1], p=atributes[2], l=atributes[3]))
 
 
