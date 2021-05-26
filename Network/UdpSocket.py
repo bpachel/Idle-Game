@@ -45,7 +45,7 @@ class UdpSocket:
         if sent < 0:
             raise Exception('Failed to send data');
         
-    def receive(self):
+    def receive(self, timeout=0):
         """
             Receive data from a remote peer
            
@@ -54,7 +54,15 @@ class UdpSocket:
            
             @return: (data, remote_address)
         """
-        data, server = self.sock.recvfrom(4096)
+        if timeout != 0:
+            self.sock.settimeout(timeout)
+
+        try:
+            data, server = self.sock.recvfrom(4096)
+        except socket.timeout as e:
+            print('Connection Timeout')
+            raise e
+
         return data, server
         
 if __name__ == "__main__":   
