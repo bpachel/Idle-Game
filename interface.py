@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font as tkfont
+from Network.client import Client
 
 
 class Application(tk.Tk):
@@ -30,7 +31,7 @@ class Application(tk.Tk):
 
     def create_frames(self):
         """zainicjalizuj wszystkie strony i umieść je jedna na drugiej"""
-        for F in (MenuView, GameView, GameEndView, LoginView):
+        for F in (MenuView, GameView, GameEndView, LoginView, RegisterView):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self)
             self.frames[page_name] = frame
@@ -86,7 +87,7 @@ class MenuView(tk.Frame):
         register_btn = tk.Button(self, text="Register", font=controller.main_font,
                                  command=lambda: controller.show_frame("RegisterView"))
         exitGame_btn = tk.Button(self, text="Exit", font=controller.main_font,
-                                 command=lambda: controller.show_frame("GameEndView"))
+                                 command=lambda: exit())
 
         some_lb.grid(row=2, column=2, sticky='nesw')
         login_btn.grid(row=4, column=2, sticky='ew')
@@ -253,14 +254,15 @@ class LoginView(tk.Frame):
         login_lb = tk.Label(self, text='Login', font=controller.main_font)
         password_lb = tk.Label(self, text='Password', font=controller.main_font)
 
-        login_entry = tk.Entry(self, text='Username', font=controller.main_font,)
-        password_entry = tk.Entry(self, text='Password', font=controller.main_font,
-                                  show="*")
+        login_entry = tk.Entry(self, text='Username', font=controller.main_font)
+        password_entry = tk.Entry(self, text='Password', font=controller.main_font, show="*")
 
         login_btn = tk.Button(self, text='Login', font=controller.main_font,
-                              command=lambda: exit())
+                              command=lambda:
+                              login(self, controller,
+                                    login_entry.get(), password_entry.get()))
         back_btn = tk.Button(self, text="Back", font=controller.main_font,
-                             command=lambda: controller.show_frame("GameEndView"))
+                             command=lambda: controller.show_frame("MenuView"))
 
         login_lb.grid(row=1, column=2, sticky='ew')
         login_entry.grid(row=2, column=2, sticky='ew')
@@ -283,6 +285,99 @@ class LoginView(tk.Frame):
     def reset(self):
         """Zresetuj stronę do stanu początkowego"""
         pass
+
+
+class RegisterView(tk.Frame):
+    """Okno Logowania
+    Attributes:
+        controller: Application, odpowiada argumentowi dostarczonemu w konstruktorze,
+            instancja klasy bazowej
+    """
+
+    def __init__(self, parent, controller):
+        """Konstruktor dla LoginView.
+        Tworzy przyciski i etykiety, rozmieszcza elementy na stronie.
+        Args:
+            parent: tk.Frame, kontener będący rodzicem strony.
+            controller: Application, instancja klasy bazowej
+        """
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+        client = Client().get_instance()
+
+        login_lb = tk.Label(self, text='Login', font=controller.main_font)
+        password_lb = tk.Label(self, text='Password', font=controller.main_font)
+        email_lb = tk.Label(self, text='Email', font=controller.main_font)
+
+        login_entry = tk.Entry(self, text='Username', font=controller.main_font, )
+        password_entry = tk.Entry(self, text='Password', font=controller.main_font,
+                                  show="*")
+        email_entry = tk.Entry(self, text='Email', font=controller.main_font)
+
+        register_btn = tk.Button(self, text='Register', font=controller.main_font,
+                                 command=lambda: register(self, controller,
+                                                          login_entry.get(), password_entry.get(), email_entry.get()))
+        back_btn = tk.Button(self, text="Back", font=controller.main_font,
+                             command=lambda: controller.show_frame("MenuView"))
+
+        login_lb.grid(row=1, column=2, sticky='ew')
+        login_entry.grid(row=2, column=2, sticky='ew')
+        password_lb.grid(row=3, column=2, sticky='ew')
+        password_entry.grid(row=4, column=2, sticky='ew')
+        email_lb.grid(row=5, column=2, sticky='ew')
+        email_entry.grid(row=6, column=2, sticky='ew')
+
+        # register_form.grid(row=2, column=2, sticky='ew')
+        register_btn.grid(row=7, column=2, sticky='ew')
+        back_btn.grid(row=8, column=2, sticky='ew')
+
+        for x in range(10):
+            self.rowconfigure(x, weight=1)
+        for y in range(5):
+            self.columnconfigure(y, weight=1)
+
+    def update(self):
+        """Uaktualnij dane na stronie"""
+        pass
+
+    def reset(self):
+        """Zresetuj stronę do stanu początkowego"""
+        pass
+
+
+def login(view, controller, username, password):
+    cl = Client().get_instance()
+    return_value = cl.login(username, password)
+    error_lb = tk.Label(view, text='Invalid username or password', font=controller.main_font)
+    print(return_value)
+    if return_value:
+        controller.show_frame("GameView")
+        error_lb.grid(row=0, column=2, sticky='ew')
+    else:
+        error_lb.grid(row=7, column=2, sticky='ew')
+
+
+def register(view, controller, username, password, email):
+    cl = Client().get_instance()
+    return_value = cl.register(username, password, email)
+    error_lb = tk.Label(view, text='Tmp', font=controller.main_font)
+    if return_value == 1:
+        switch_to_game(view, controller)
+        error_lb.grid(row=0, column=2, sticky='ew')
+        return
+    elif return_value == 2:
+        print("user exist")
+        error_lb['text'] = 'Username already exists.'
+    elif return_value == 3:
+        print("email exist")
+        error_lb['text'] = 'Email already exists.'
+
+    error_lb.grid(row=9, column=2, sticky='ew')
+
+
+def switch_to_game(view, controller):
+    controller.show_frame("GameView")
 
 
 def main():
